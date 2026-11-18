@@ -554,11 +554,85 @@ jobs:
           req = urllib.request.Request(url, headers={'apikey': os.environ['SUPABASE_KEY'], 'Authorization': f'Bearer {os.environ[\"SUPABASE_KEY\"]}'})
           tasks = json.loads(urllib.request.urlopen(req).read().decode())
           resumen = '\n'.join([f'• {t[\"title\"]} ({t[\"due_date\"]})' for t in tasks]) or 'Sin tareas pendientes.'
-          msg = f'⚡ FocusDev: Hora de estudiar hoy.\n\nPróximos plazos:\n{resumen}'
+          msg = f'Hora de estudiar hoy.\n\nPróximos plazos:\n{resumen}'
           tg_url = f'https://api.telegram.org/bot{os.environ[\"TG_BOT_TOKEN\"]}/sendMessage'
           data = json.dumps({'chat_id': os.environ['TG_CHAT_ID'], 'text': msg}).encode()
           urllib.request.urlopen(urllib.request.Request(tg_url, data=data, headers={'Content-Type': 'application/json'}))
           "</pre>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- =========================================================
+           SECCIÓN 5: VISTA DE DETALLE DE TAREA (GUÍA TÉCNICA & ENTREGAS)
+           ========================================================= -->
+      <section id="view-task-detail" class="space-y-4 sm:space-y-5 hidden fade-in">
+        <!-- Barra superior de retorno y metadatos -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3.5 border-b border-zinc-200 dark:border-zinc-800/80">
+          <button onclick="goBackFromTaskDetail()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-mono text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+            <span>←</span>
+            <span>Volver</span>
+          </button>
+
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span id="detail-task-module-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">QUINCENA</span>
+            <span id="detail-task-priority-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500">MEDIA</span>
+            <span id="detail-task-deadline-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500">--</span>
+          </div>
+        </div>
+
+        <!-- Encabezado de la Tarea y Botones 50/50 para Samsung A17 -->
+        <div class="p-4 sm:p-5 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-4">
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <span id="detail-task-module-title" class="text-[11px] font-mono text-zinc-400 truncate">--</span>
+              <span id="detail-task-status-pill" class="text-[10px] font-mono px-2 py-0.5 rounded border shrink-0">PENDIENTE</span>
+            </div>
+            <h1 id="detail-task-title" class="text-base sm:text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 leading-snug">
+              --
+            </h1>
+          </div>
+
+          <!-- Botones de acción 50/50 sin superposición en 360px -->
+          <div class="grid grid-cols-2 gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
+            <button id="detail-btn-toggle" onclick="toggleCurrentDetailTask()" class="py-2.5 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-xs font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-center">
+              ✓ Completar tarea
+            </button>
+            <button id="detail-btn-upload" onclick="openDeliverableForCurrentDetailTask()" class="py-2.5 px-3 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-xs font-medium hover:opacity-90 transition-opacity text-center">
+              ↑ Subir entregable
+            </button>
+          </div>
+        </div>
+
+        <!-- Contenedor estructurado de la descripción traída de la Base de Datos -->
+        <div id="detail-task-body" class="space-y-3.5">
+          <!-- Renderizado dinámicamente desde task.description en Supabase -->
+        </div>
+
+        <!-- Entregables vinculados a esta tarea -->
+        <div class="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-[11px] font-semibold uppercase tracking-wider font-mono text-zinc-500 dark:text-zinc-400">Entregables de esta tarea</h2>
+            <button onclick="openDeliverableForCurrentDetailTask()" class="text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 underline">+ Adjuntar</button>
+          </div>
+          <div id="detail-task-deliverables" class="space-y-2">
+            <!-- Lista de entregables de esta tarea -->
+          </div>
+        </div>
+
+        <!-- Editor desplegable para modificar la guía o agregar apuntes personales -->
+        <details id="detail-edit-notes-box" class="rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] overflow-hidden">
+          <summary class="px-4 py-3 text-xs font-mono text-zinc-600 dark:text-zinc-300 cursor-pointer select-none flex items-center justify-between hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
+            <span>Editar descripción / Agregar mis apuntes de estudio</span>
+            <span class="text-zinc-400">▼</span>
+          </summary>
+          <div class="p-4 border-t border-zinc-100 dark:border-zinc-800 space-y-3">
+            <textarea id="detail-task-desc-editor" rows="7" placeholder="Escribe aquí la descripción detallada, pasos a aprender o tus apuntes..." class="w-full p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 font-sans leading-relaxed focus:outline-none focus:border-zinc-400"></textarea>
+            <div class="flex justify-end">
+              <button onclick="saveTaskDescriptionFromDetail()" class="py-2 px-4 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-xs font-medium hover:opacity-90 transition-opacity">
+                Guardar descripción en Base de Datos
+              </button>
             </div>
           </div>
         </details>
@@ -867,6 +941,8 @@ jobs:
 
     let state = loadLocalState();
     let currentTab = 'dashboard';
+    let previousTabBeforeDetail = 'roadmap';
+    let currentDetailTaskId = null;
     let currentTaskFilter = 'all';
     let selectedFileBuffer = null;
     let selectedRawFile = null;
@@ -1035,13 +1111,14 @@ jobs:
     // =========================================================
     function switchTab(tabName) {
       currentTab = tabName;
-      ['dashboard', 'roadmap', 'deliverables', 'settings'].forEach(t => {
+      ['dashboard', 'roadmap', 'deliverables', 'settings', 'task-detail'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         if (view) view.classList.toggle('hidden', t !== tabName);
 
+        const navKey = (t === 'task-detail') ? previousTabBeforeDetail : t;
         const deskBtn = document.getElementById(`nav-desk-${t}`);
         if (deskBtn) {
-          if (t === tabName) {
+          if (t === navKey) {
             deskBtn.className = 'w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium bg-zinc-100 dark:bg-zinc-800/90 text-zinc-900 dark:text-zinc-100';
           } else {
             deskBtn.className = 'w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors';
@@ -1050,13 +1127,199 @@ jobs:
 
         const mobBtn = document.getElementById(`nav-mob-${t}`);
         if (mobBtn) {
-          if (t === tabName) {
+          if (t === navKey) {
             mobBtn.className = 'flex flex-col items-center justify-center flex-1 py-1.5 text-[11px] font-semibold gap-1 text-zinc-900 dark:text-zinc-100';
           } else {
             mobBtn.className = 'flex flex-col items-center justify-center flex-1 py-1.5 text-[11px] font-medium gap-1 text-zinc-400 dark:text-zinc-500';
           }
         }
       });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openTaskDetail(taskId) {
+      const task = state.tasks.find(t => String(t.id) === String(taskId));
+      if (!task) return;
+      if (currentTab !== 'task-detail') {
+        previousTabBeforeDetail = currentTab;
+      }
+      currentDetailTaskId = String(task.id);
+      renderTaskDetailView();
+      switchTab('task-detail');
+    }
+
+    function goBackFromTaskDetail() {
+      switchTab(previousTabBeforeDetail || 'roadmap');
+    }
+
+    function renderStructuredDescription(rawText) {
+      if (!rawText || !rawText.trim()) {
+        return `
+          <div class="p-5 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 text-center space-y-2">
+            <p class="text-xs font-medium text-zinc-700 dark:text-zinc-300">Sin descripción en la base de datos.</p>
+            <p class="text-[11px] text-zinc-400">Ejecuta el script UPDATE en Supabase o agrégala desde el editor de abajo.</p>
+          </div>
+        `;
+      }
+
+      const blocks = [];
+      const regex = /(LO QUE DEBES APRENDER:|LO QUE DEBES PROGRAMAR(?: \(EL CIERRE\))?:|FOCO DIPLOMADO BD:|OBJETIVO DIPLOMADO BD:|ENTREGABLE DE LA QUINCENA:|CRITERIO DE ENTREGA:)/gi;
+      const parts = rawText.split(regex);
+
+      if (parts.length === 1) {
+        return `
+          <div class="p-4 sm:p-5 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-2">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Guía de la Tarea</span>
+            <div class="text-xs sm:text-sm text-zinc-700 dark:text-zinc-200 leading-relaxed whitespace-pre-line">${escapeHtml(rawText.trim())}</div>
+          </div>
+        `;
+      }
+
+      if (parts[0] && parts[0].trim()) {
+        blocks.push({ label: 'RESUMEN DE LA TAREA', content: parts[0].trim(), accent: 'zinc' });
+      }
+
+      for (let i = 1; i < parts.length; i += 2) {
+        const header = (parts[i] || '').replace(/:$/, '').trim().toUpperCase();
+        const body = (parts[i + 1] || '').trim();
+        if (!body) continue;
+        let accent = 'zinc';
+        if (header.includes('APRENDER')) accent = 'amber';
+        else if (header.includes('PROGRAMAR') || header.includes('ENTREGABLE')) accent = 'emerald';
+        blocks.push({ label: header, content: body, accent });
+      }
+
+      return blocks.map(b => {
+        const badgeStyle = b.accent === 'emerald'
+          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+          : b.accent === 'amber'
+          ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700';
+
+        return `
+          <div class="p-4 sm:p-5 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${badgeStyle}">${escapeHtml(b.label)}</span>
+            </div>
+            <div class="text-xs sm:text-sm text-zinc-700 dark:text-zinc-200 leading-relaxed whitespace-pre-line">${escapeHtml(b.content)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTaskDetailView() {
+      if (!currentDetailTaskId) return;
+      const task = state.tasks.find(t => String(t.id) === String(currentDetailTaskId));
+      if (!task) return;
+
+      const mod = state.modules.find(m => String(m.id) === String(task.moduleId));
+      const isDone = task.status === 'completed';
+      const diff = daysUntil(task.deadline);
+
+      document.getElementById('detail-task-module-badge').textContent = mod ? mod.category : 'TAREA';
+      document.getElementById('detail-task-module-title').textContent = mod ? mod.title : 'Plan Personal';
+      document.getElementById('detail-task-title').textContent = task.title;
+
+      const prioEl = document.getElementById('detail-task-priority-badge');
+      if (task.priority === 'high') {
+        prioEl.textContent = 'PRIORIDAD ALTA';
+        prioEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20';
+      } else if (task.priority === 'low') {
+        prioEl.textContent = 'PRIORIDAD BAJA';
+        prioEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-400';
+      } else {
+        prioEl.textContent = 'PRIORIDAD MEDIA';
+        prioEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300';
+      }
+
+      const deadEl = document.getElementById('detail-task-deadline-badge');
+      if (diff < 0) {
+        deadEl.textContent = `Venció hace ${Math.abs(diff)}d (${formatShortDate(task.deadline)})`;
+        deadEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20';
+      } else if (diff === 0) {
+        deadEl.textContent = `Vence HOY (${formatShortDate(task.deadline)})`;
+        deadEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20';
+      } else {
+        deadEl.textContent = `Plazo: ${formatShortDate(task.deadline)} (en ${diff}d)`;
+        deadEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300';
+      }
+
+      const statusPill = document.getElementById('detail-task-status-pill');
+      const toggleBtn = document.getElementById('detail-btn-toggle');
+      if (isDone) {
+        statusPill.textContent = 'COMPLETADA ✓';
+        statusPill.className = 'text-[10px] font-mono px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 shrink-0';
+        toggleBtn.textContent = '↺ Reabrir tarea';
+      } else {
+        statusPill.textContent = 'PENDIENTE';
+        statusPill.className = 'text-[10px] font-mono px-2 py-0.5 rounded border bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 shrink-0';
+        toggleBtn.textContent = '✓ Marcar completada';
+      }
+
+      const fullDesc = (task.description || '').trim();
+      document.getElementById('detail-task-body').innerHTML = renderStructuredDescription(fullDesc);
+      document.getElementById('detail-task-desc-editor').value = fullDesc;
+
+      const linkedDelivs = state.deliverables.filter(d => String(d.taskId) === String(task.id));
+      const delivContainer = document.getElementById('detail-task-deliverables');
+      if (linkedDelivs.length === 0) {
+        delivContainer.innerHTML = `<p class="text-xs font-mono text-zinc-400 py-2">Aún no has subido archivos ni repositorios para esta tarea.</p>`;
+      } else {
+        delivContainer.innerHTML = linkedDelivs.map(d => {
+          const href = d.fileUrl || d.fileDataUrl || d.repoUrl || '';
+          return `
+            <div class="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200/70 dark:border-zinc-800 flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <p class="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate">${escapeHtml(d.title || d.fileName)}</p>
+                <p class="text-[11px] font-mono text-zinc-400 truncate">${escapeHtml(d.fileName)} • Subido: ${formatShortDate(d.submittedAt)}</p>
+              </div>
+              ${href ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-[11px] font-medium shrink-0">Abrir ↗</a>` : ''}
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    async function toggleCurrentDetailTask() {
+      if (!currentDetailTaskId) return;
+      await cycleTaskStatus(currentDetailTaskId);
+      renderTaskDetailView();
+    }
+
+    function openDeliverableForCurrentDetailTask() {
+      if (!currentDetailTaskId) return;
+      openDeliverableModal(currentDetailTaskId);
+    }
+
+    async function saveTaskDescriptionFromDetail() {
+      if (!currentDetailTaskId) return;
+      const task = state.tasks.find(t => String(t.id) === String(currentDetailTaskId));
+      if (!task) return;
+
+      const newDesc = document.getElementById('detail-task-desc-editor').value.trim();
+      task.description = newDesc;
+
+      if (supabaseOnline && supabaseClient && !String(task.id).startsWith('t-')) {
+        const { error } = await supabaseClient
+          .from('tasks')
+          .update({ description: newDesc })
+          .eq('id', Number(task.id));
+
+        if (error) {
+          showToast(`Ejecuta primero el script SQL para habilitar la columna description: ${error.message}`, 'amber');
+          saveState();
+          renderTaskDetailView();
+          return;
+        }
+        await CloudService.pullStateFromServer();
+        renderTaskDetailView();
+        showToast('Descripción actualizada en Supabase PostgreSQL.', 'emerald');
+        return;
+      }
+
+      saveState();
+      renderTaskDetailView();
+      showToast('Descripción guardada.', 'emerald');
     }
 
     function setViewportMode(mode) {
@@ -1181,6 +1444,9 @@ jobs:
       renderDashboardCards();
       renderRoadmap();
       renderDeliverables();
+      if (currentTab === 'task-detail' && currentDetailTaskId) {
+        renderTaskDetailView();
+      }
     }
 
     function renderDashboardCards() {
@@ -1206,6 +1472,7 @@ jobs:
         const next = pendingTasks[0];
         const diff = daysUntil(next.deadline);
         const mod = state.modules.find(m => m.id === next.moduleId);
+        const previewDesc = (next.description || '').trim();
 
         if (diff < 0) {
           nextBadge.textContent = `Venció hace ${Math.abs(diff)}d`;
@@ -1219,8 +1486,11 @@ jobs:
         }
 
         nextCard.innerHTML = `
-          <h3 class="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug">${escapeHtml(next.title)}</h3>
-          ${next.description ? `<p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">${escapeHtml(next.description)}</p>` : ''}
+          <button onclick="openTaskDetail('${next.id}')" class="text-left group w-full space-y-1">
+            <h3 class="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100 group-hover:underline leading-snug">${escapeHtml(next.title)}</h3>
+            ${previewDesc ? `<p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">${escapeHtml(previewDesc)}</p>` : ''}
+            <span class="inline-block text-[11px] font-mono text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 pt-0.5">Ver guía completa →</span>
+          </button>
         `;
         nextModSpan.textContent = mod ? `${mod.category} • ${mod.title}` : 'Tarea asignada';
         quickUploadBtn.onclick = () => openDeliverableModal(next.id);
@@ -1236,11 +1506,11 @@ jobs:
           const dateColor = diff < 0 ? 'text-red-500' : diff <= 2 ? 'text-amber-500' : 'text-zinc-400';
           return `
             <div class="py-2.5 flex items-center justify-between gap-2.5">
-              <div class="flex items-center gap-2.5 min-w-0">
+              <div class="flex items-center gap-2.5 min-w-0 flex-1">
                 <button onclick="cycleTaskStatus('${t.id}')" class="w-4 h-4 rounded border border-zinc-300 dark:border-zinc-700 hover:border-zinc-500 shrink-0 transition-colors" title="Completar"></button>
-                <span class="text-xs text-zinc-800 dark:text-zinc-200 truncate">${escapeHtml(t.title)}</span>
+                <button onclick="openTaskDetail('${t.id}')" class="text-left text-xs text-zinc-800 dark:text-zinc-200 hover:underline truncate flex-1" title="Ver descripción de la tarea">${escapeHtml(t.title)}</button>
               </div>
-              <span class="text-[11px] font-mono shrink-0 ${dateColor}">${formatShortDate(t.deadline)}</span>
+              <button onclick="openTaskDetail('${t.id}')" class="text-[11px] font-mono shrink-0 ${dateColor} hover:underline">${formatShortDate(t.deadline)} →</button>
             </div>
           `;
         }).join('');
@@ -1328,25 +1598,30 @@ jobs:
                 const prioBadge = t.priority === 'high'
                   ? '<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-500">ALTA</span>'
                   : '';
+                const previewDesc = (t.description || '').trim();
 
                 return `
                   <div class="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors">
-                    <div class="flex items-start gap-2.5 min-w-0">
+                    <div class="flex items-start gap-2.5 min-w-0 flex-1">
                       <button onclick="cycleTaskStatus('${t.id}')" class="mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${isDone ? 'bg-zinc-900 border-zinc-900 dark:bg-zinc-100 dark:border-zinc-100 text-white dark:text-zinc-950' : 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-500'}">
                         ${isDone ? '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
                       </button>
-                      <div class="min-w-0">
+                      <button onclick="openTaskDetail('${t.id}')" class="text-left min-w-0 flex-1 group">
                         <div class="flex flex-wrap items-center gap-1.5">
-                          <span class="text-xs font-medium leading-snug ${isDone ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}">${escapeHtml(t.title)}</span>
+                          <span class="text-xs font-medium leading-snug group-hover:underline ${isDone ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}">${escapeHtml(t.title)}</span>
                           ${prioBadge}
                         </div>
-                        ${t.description ? `<p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">${escapeHtml(t.description)}</p>` : ''}
-                      </div>
+                        ${previewDesc ? `<p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-1">${escapeHtml(previewDesc)}</p>` : ''}
+                        <span class="inline-block text-[10px] font-mono text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200 mt-1">Ver guía detallada →</span>
+                      </button>
                     </div>
 
                     <div class="flex items-center justify-between sm:justify-end gap-2 pl-6 sm:pl-0 shrink-0">
                       <span class="text-[11px] font-mono text-zinc-400">${formatShortDate(t.deadline)}</span>
                       <div class="flex items-center gap-1.5">
+                        <button onclick="openTaskDetail('${t.id}')" class="px-2 py-1 rounded border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                          Guía
+                        </button>
                         <button onclick="openDeliverableModal('${t.id}')" class="px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">
                           ↑ Subir
                         </button>
@@ -1531,16 +1806,30 @@ jobs:
 
       if (supabaseOnline && supabaseClient && !String(moduleId).startsWith('mod-')) {
         const prioLabel = priority === 'high' ? 'Alta' : priority === 'low' ? 'Baja' : 'Media';
-        const fullTitle = description ? `${title} — ${description}` : title;
-        const { error } = await supabaseClient
+        let { error } = await supabaseClient
           .from('tasks')
           .insert([{
             module_id: Number(moduleId),
-            title: fullTitle,
+            title: title,
+            description: description,
             due_date: deadline,
             priority: prioLabel,
             completed: false
           }]);
+
+        // Respaldo si aún no se ha creado la columna description en PostgreSQL
+        if (error && String(error.message).includes('description')) {
+          const fallbackRes = await supabaseClient
+            .from('tasks')
+            .insert([{
+              module_id: Number(moduleId),
+              title: title,
+              due_date: deadline,
+              priority: prioLabel,
+              completed: false
+            }]);
+          error = fallbackRes.error;
+        }
 
         if (error) {
           showToast(`Error: ${error.message}`, 'amber');
@@ -2117,8 +2406,8 @@ jobs:
           : '• Sin tareas pendientes.';
 
         const headerLine = studiedToday
-          ? `✅ Estudio de hoy cumplido (Racha: ${streak}d)`
-          : `⚠️ Aún no has registrado tu sesión de hoy (Racha: ${streak}d)`;
+          ? `Estudio de hoy cumplido (Racha: ${streak}d)`
+          : `Aún no has registrado tu sesión de hoy (Racha: ${streak}d)`;
 
         const text = `${headerLine}\n\n*Próximos entregables:*\n${tasksLines}`;
 
