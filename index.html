@@ -2120,7 +2120,7 @@ jobs:
           ? `✅ Estudio de hoy cumplido (Racha: ${streak}d)`
           : `⚠️ Aún no has registrado tu sesión de hoy (Racha: ${streak}d)`;
 
-        const text = ` *FocusDev // Study OS*\n${headerLine}\n\n*Próximos entregables:*\n${tasksLines}`;
+        const text = `${headerLine}\n\n*Próximos entregables:*\n${tasksLines}`;
 
         const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST',
