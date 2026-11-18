@@ -179,12 +179,28 @@
             <span id="badge-tasks-count" class="font-mono text-[10px] px-1.5 py-0.2 rounded bg-zinc-200/70 dark:bg-zinc-800">0</span>
           </button>
 
+          <button onclick="switchTab('calendar')" id="nav-desk-calendar" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors">
+            <span class="flex items-center gap-2.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Calendario
+            </span>
+            <span class="font-mono text-[10px] opacity-60">03</span>
+          </button>
+
           <button onclick="switchTab('deliverables')" id="nav-desk-deliverables" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors">
             <span class="flex items-center gap-2.5">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               Entregables
             </span>
             <span id="badge-deliv-count" class="font-mono text-[10px] px-1.5 py-0.2 rounded bg-zinc-200/70 dark:bg-zinc-800">0</span>
+          </button>
+
+          <button onclick="switchTab('settings')" id="nav-desk-settings" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors">
+            <span class="flex items-center gap-2.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+              Nube & Telegram
+            </span>
+            <span class="font-mono text-[10px] opacity-60">05</span>
           </button>
 
           <button onclick="switchTab('settings')" id="nav-desk-settings" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors">
@@ -407,6 +423,96 @@
         <!-- Contenedor de Módulos y sus Tareas -->
         <div id="roadmap-modules-container" class="space-y-3.5">
           <!-- Renderizado dinámicamente -->
+        </div>
+      </section>
+
+      <!-- =========================================================
+           SECCIÓN 2B: CALENDARIO DE FECHAS Y CRONOGRAMA MENSUAL
+           ========================================================= -->
+      <section id="view-calendar" class="space-y-4 sm:space-y-5 hidden fade-in">
+        <!-- Encabezado con Mes/Año y controles compactos -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-200 dark:border-zinc-800/80">
+          <div class="min-w-0">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Agenda de Plazos</span>
+            <h1 id="cal-month-title" class="text-lg sm:text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 capitalize">
+              --
+            </h1>
+          </div>
+
+          <div class="grid grid-cols-3 sm:flex items-center gap-1.5 w-full sm:w-auto">
+            <button onclick="changeCalendarMonth(-1)" class="py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-mono text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-center" aria-label="Mes anterior">
+              &lt;
+            </button>
+            <button onclick="goToCalendarToday()" class="py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-center">
+              Hoy
+            </button>
+            <button onclick="changeCalendarMonth(1)" class="py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-mono text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-center" aria-label="Mes siguiente">
+              &gt;
+            </button>
+          </div>
+        </div>
+
+        <!-- Bloque Principal: Cuadrícula Mensual (7 cols) + Detalle del Día (5 cols) -->
+        <div class="sim-grid-cols grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <!-- Cuadrícula Mensual -->
+          <div class="lg:col-span-7 p-3.5 sm:p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-3">
+            <!-- Días de la semana empezando en Lunes -->
+            <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-mono uppercase tracking-wider text-zinc-400 pb-1">
+              <span>L</span>
+              <span>M</span>
+              <span>X</span>
+              <span>J</span>
+              <span>V</span>
+              <span>S</span>
+              <span>D</span>
+            </div>
+
+            <!-- Celdas de días -->
+            <div id="cal-days-grid" class="grid grid-cols-7 gap-1">
+              <!-- Renderizado dinámicamente -->
+            </div>
+
+            <!-- Leyenda discreta de indicadores -->
+            <div class="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] font-mono text-zinc-500 dark:text-zinc-400">
+              <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Vencida</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Alta</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-300"></span>Pendiente</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Cumplido</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>Meta módulo</span>
+            </div>
+          </div>
+
+          <!-- Panel de Detalle del Día Seleccionado -->
+          <div class="lg:col-span-5 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] flex flex-col justify-between space-y-3.5">
+            <div class="space-y-3.5">
+              <div class="flex items-start justify-between gap-2 pb-3 border-b border-zinc-100 dark:border-zinc-800/80">
+                <div class="min-w-0">
+                  <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Detalle del Día</span>
+                  <h2 id="cal-selected-date-label" class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 leading-snug capitalize">
+                    --
+                  </h2>
+                </div>
+                <button onclick="openTaskModal(null, calSelectedDate)" class="px-2.5 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-xs font-medium hover:opacity-90 transition-opacity shrink-0">
+                  + Tarea
+                </button>
+              </div>
+
+              <div id="cal-selected-day-content" class="space-y-2.5">
+                <!-- Tareas, metas y sesiones del día seleccionado -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cronograma Completo del Mes Visible -->
+        <div class="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-3">
+          <div class="flex items-center justify-between gap-2 pb-2 border-b border-zinc-100 dark:border-zinc-800/80">
+            <h2 class="text-[11px] font-semibold uppercase tracking-wider font-mono text-zinc-500 dark:text-zinc-400">Cronograma del Mes</h2>
+            <span id="cal-month-agenda-count" class="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500">0 eventos</span>
+          </div>
+          <div id="cal-month-agenda-list" class="divide-y divide-zinc-100 dark:divide-zinc-800/80">
+            <!-- Lista cronológica de todas las fechas del mes -->
+          </div>
         </div>
       </section>
 
@@ -635,31 +741,31 @@ jobs:
               </button>
             </div>
           </div>
-        </details>
-      </section>
-
-    </main>
-
-    <!-- BARRA DE NAVEGACIÓN INFERIOR (ESTILO APP ANDROID NATIVA) -->
-    <nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 right-0 z-30 border-t border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-[#0c0c0f]/95 backdrop-blur-md flex items-center justify-around h-16 px-1">
-      <button onclick="switchTab('dashboard')" id="nav-mob-dashboard" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[11px] font-medium gap-1">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-        <span>Inicio</span>
+    <!-- BARRA DE NAVEGACIÓN INFERIOR (ESTILO APP ANDROID NATIVA — 5 ACCESOS PARA 360PX) -->
+    <nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 right-0 z-30 border-t border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-[#0c0c0f]/95 backdrop-blur-md flex items-center justify-around h-16 px-0.5">
+      <button onclick="switchTab('dashboard')" id="nav-mob-dashboard" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-medium gap-1 min-w-0">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="truncate">Inicio</span>
       </button>
 
-      <button onclick="switchTab('roadmap')" id="nav-mob-roadmap" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[11px] font-medium gap-1">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        <span>Plan</span>
+      <button onclick="switchTab('roadmap')" id="nav-mob-roadmap" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-medium gap-1 min-w-0">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span class="truncate">Plan</span>
       </button>
 
-      <button onclick="switchTab('deliverables')" id="nav-mob-deliverables" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[11px] font-medium gap-1">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <span>Entregas</span>
+      <button onclick="switchTab('calendar')" id="nav-mob-calendar" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-medium gap-1 min-w-0">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="truncate">Fechas</span>
       </button>
 
-      <button onclick="switchTab('settings')" id="nav-mob-settings" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[11px] font-medium gap-1">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
-        <span>Nube</span>
+      <button onclick="switchTab('deliverables')" id="nav-mob-deliverables" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-medium gap-1 min-w-0">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span class="truncate">Entregas</span>
+      </button>
+
+      <button onclick="switchTab('settings')" id="nav-mob-settings" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-medium gap-1 min-w-0">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+        <span class="truncate">Nube</span>
       </button>
     </nav>
   </div>
@@ -884,8 +990,21 @@ jobs:
     const TG_CHAT_KEY = 'focusdev_tg_chat_id';
     const TG_LAST_AUTO_KEY = 'focusdev_last_tg_auto_date';
 
+    function formatLocalISO(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
     function todayISO() {
-      return new Date().toISOString().split('T')[0];
+      return formatLocalISO(new Date());
+    }
+
+    function offsetDateISO(days) {
+      const d = new Date();
+      d.setDate(d.getDate() + days);
+      return formatLocalISO(d);
     }
 
     function offsetDateISO(days) {
@@ -944,6 +1063,9 @@ jobs:
     let previousTabBeforeDetail = 'roadmap';
     let currentDetailTaskId = null;
     let currentTaskFilter = 'all';
+    let calViewYear = new Date().getFullYear();
+    let calViewMonth = new Date().getMonth();
+    let calSelectedDate = todayISO();
     let selectedFileBuffer = null;
     let selectedRawFile = null;
     let supabaseClient = null;
@@ -1111,14 +1233,15 @@ jobs:
     // =========================================================
     function switchTab(tabName) {
       currentTab = tabName;
-      ['dashboard', 'roadmap', 'deliverables', 'settings', 'task-detail'].forEach(t => {
+      const activeNavTab = (tabName === 'task-detail') ? previousTabBeforeDetail : tabName;
+
+      ['dashboard', 'roadmap', 'calendar', 'deliverables', 'settings', 'task-detail'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         if (view) view.classList.toggle('hidden', t !== tabName);
 
-        const navKey = (t === 'task-detail') ? previousTabBeforeDetail : t;
         const deskBtn = document.getElementById(`nav-desk-${t}`);
         if (deskBtn) {
-          if (t === navKey) {
+          if (t === activeNavTab) {
             deskBtn.className = 'w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium bg-zinc-100 dark:bg-zinc-800/90 text-zinc-900 dark:text-zinc-100';
           } else {
             deskBtn.className = 'w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors';
@@ -1127,13 +1250,17 @@ jobs:
 
         const mobBtn = document.getElementById(`nav-mob-${t}`);
         if (mobBtn) {
-          if (t === navKey) {
-            mobBtn.className = 'flex flex-col items-center justify-center flex-1 py-1.5 text-[11px] font-semibold gap-1 text-zinc-900 dark:text-zinc-100';
+          if (t === activeNavTab) {
+            mobBtn.className = 'flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-semibold gap-1 min-w-0 text-zinc-900 dark:text-zinc-100';
           } else {
-            mobBtn.className = 'flex flex-col items-center justify-center flex-1 py-1.5 text-[11px] font-medium gap-1 text-zinc-400 dark:text-zinc-500';
+            mobBtn.className = 'flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-medium gap-1 min-w-0 text-zinc-400 dark:text-zinc-500';
           }
         }
       });
+
+      if (tabName === 'calendar') {
+        renderCalendar();
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -1443,6 +1570,7 @@ jobs:
 
       renderDashboardCards();
       renderRoadmap();
+      renderCalendar();
       renderDeliverables();
       if (currentTab === 'task-detail' && currentDetailTaskId) {
         renderTaskDetailView();
@@ -1703,16 +1831,321 @@ jobs:
     }
 
     // =========================================================
-    // CRUD COMPLETO: MÓDULOS, TAREAS, ENTREGABLES Y SESIONES
+    // CALENDARIO INTERACTIVO MENSUAL Y CRONOGRAMA
     // =========================================================
-    function openModuleModal() {
-      document.getElementById('module-title').value = '';
-      document.getElementById('module-category').value = '';
-      document.getElementById('module-target-date').value = todayISO();
-      document.getElementById('module-desc').value = '';
-      const modal = document.getElementById('modal-module');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+    const SPANISH_MONTHS = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    const SPANISH_WEEKDAYS = [
+      'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'
+    ];
+
+    function formatLongSpanishDate(isoDate) {
+      if (!isoDate) return '--';
+      const parts = isoDate.split('-');
+      if (parts.length !== 3) return isoDate;
+      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      const weekday = SPANISH_WEEKDAYS[d.getDay()] || '';
+      const monthName = SPANISH_MONTHS[d.getMonth()] || '';
+      return `${weekday} ${d.getDate()} de ${monthName}`;
+    }
+
+    function changeCalendarMonth(delta) {
+      calViewMonth += delta;
+      if (calViewMonth < 0) {
+        calViewMonth = 11;
+        calViewYear--;
+      } else if (calViewMonth > 11) {
+        calViewMonth = 0;
+        calViewYear++;
+      }
+
+      const today = todayISO();
+      const monthPrefix = `${calViewYear}-${String(calViewMonth + 1).padStart(2, '0')}`;
+      if (today.startsWith(monthPrefix)) {
+        calSelectedDate = today;
+      } else if (!calSelectedDate.startsWith(monthPrefix)) {
+        calSelectedDate = `${monthPrefix}-01`;
+      }
+      renderCalendar();
+    }
+
+    function goToCalendarToday() {
+      const now = new Date();
+      calViewYear = now.getFullYear();
+      calViewMonth = now.getMonth();
+      calSelectedDate = todayISO();
+      renderCalendar();
+    }
+
+    function selectCalendarDate(isoDate) {
+      calSelectedDate = isoDate;
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const titleEl = document.getElementById('cal-month-title');
+      const gridEl = document.getElementById('cal-days-grid');
+      if (!titleEl || !gridEl) return;
+
+      const today = todayISO();
+      const monthStr = String(calViewMonth + 1).padStart(2, '0');
+      const monthPrefix = `${calViewYear}-${monthStr}`;
+      titleEl.textContent = `${SPANISH_MONTHS[calViewMonth]} ${calViewYear}`;
+
+      // Indexar eventos por fecha YYYY-MM-DD leyendo dinámicamente desde state (Supabase / local)
+      const tasksByDate = {};
+      state.tasks.forEach(t => {
+        if (!t.deadline) return;
+        if (!tasksByDate[t.deadline]) tasksByDate[t.deadline] = [];
+        tasksByDate[t.deadline].push(t);
+      });
+
+      const modulesByDate = {};
+      state.modules.forEach(m => {
+        if (!m.targetDate) return;
+        if (!modulesByDate[m.targetDate]) modulesByDate[m.targetDate] = [];
+        modulesByDate[m.targetDate].push(m);
+      });
+
+      const logsByDate = {};
+      state.studyLogs.forEach(l => {
+        if (!l.date) return;
+        if (!logsByDate[l.date]) logsByDate[l.date] = [];
+        logsByDate[l.date].push(l);
+      });
+
+      // Primer día del mes (ajustado para semana que inicia en Lunes: 0 = Lun ... 6 = Dom)
+      const firstOfMonth = new Date(calViewYear, calViewMonth, 1);
+      const startOffset = (firstOfMonth.getDay() + 6) % 7;
+      const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
+
+      let cellsHtml = '';
+      for (let i = 0; i < startOffset; i++) {
+        cellsHtml += `<div class="min-h-[44px] sm:min-h-[52px]"></div>`;
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const iso = `${monthPrefix}-${String(day).padStart(2, '0')}`;
+        const isToday = iso === today;
+        const isSelected = iso === calSelectedDate;
+
+        const dayTasks = tasksByDate[iso] || [];
+        const dayMods = modulesByDate[iso] || [];
+        const dayLogs = logsByDate[iso] || [];
+
+        const hasOverdue = dayTasks.some(t => t.status !== 'completed' && t.deadline < today);
+        const hasHighPending = dayTasks.some(t => t.status !== 'completed' && t.priority === 'high' && t.deadline >= today);
+        const hasNormalPending = dayTasks.some(t => t.status !== 'completed' && t.priority !== 'high' && t.deadline >= today);
+        const hasDoneOrLog = dayTasks.some(t => t.status === 'completed') || dayLogs.length > 0;
+        const hasModuleTarget = dayMods.length > 0;
+
+        const dots = [];
+        if (hasOverdue) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>');
+        if (hasHighPending) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>');
+        if (hasNormalPending) {
+          const neutralDot = isSelected ? 'bg-zinc-300 dark:bg-zinc-600' : 'bg-zinc-400 dark:bg-zinc-300';
+          dots.push(`<span class="w-1.5 h-1.5 rounded-full ${neutralDot}"></span>`);
+        }
+        if (hasDoneOrLog) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>');
+        if (hasModuleTarget) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>');
+
+        let cellClass = 'min-h-[44px] sm:min-h-[52px] rounded-lg flex flex-col items-center justify-center gap-1 p-1 transition-all ';
+        if (isSelected) {
+          cellClass += 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-semibold';
+        } else if (isToday) {
+          cellClass += 'bg-zinc-100/80 dark:bg-zinc-800/70 text-zinc-900 dark:text-zinc-100 font-semibold ring-1 ring-zinc-400 dark:ring-zinc-500';
+        } else {
+          cellClass += 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60';
+        }
+
+        cellsHtml += `
+          <button onclick="selectCalendarDate('${iso}')" class="${cellClass}" aria-label="${iso}">
+            <span class="text-xs font-mono leading-none">${day}</span>
+            <span class="flex items-center justify-center gap-0.5 h-1.5">${dots.join('')}</span>
+          </button>
+        `;
+      }
+
+      gridEl.innerHTML = cellsHtml;
+      renderSelectedDayDetail(tasksByDate[calSelectedDate] || [], modulesByDate[calSelectedDate] || [], logsByDate[calSelectedDate] || []);
+      renderMonthlyAgenda(monthPrefix);
+    }
+
+    function renderSelectedDayDetail(dayTasks, dayMods, dayLogs) {
+      const labelEl = document.getElementById('cal-selected-date-label');
+      const contentEl = document.getElementById('cal-selected-day-content');
+      if (!labelEl || !contentEl) return;
+
+      const today = todayISO();
+      labelEl.textContent = formatLongSpanishDate(calSelectedDate);
+
+      if (dayTasks.length === 0 && dayMods.length === 0 && dayLogs.length === 0) {
+        contentEl.innerHTML = `
+          <div class="py-6 text-center space-y-1.5">
+            <p class="text-xs font-mono text-zinc-400">Día libre sin plazos ni registros.</p>
+            <p class="text-[11px] text-zinc-500">Toca "+ Tarea" para programar algo en esta fecha.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+
+      if (dayMods.length > 0) {
+        html += `<div class="space-y-1.5">`;
+        dayMods.forEach(m => {
+          html += `
+            <div class="p-2.5 rounded-lg border border-sky-400/25 bg-sky-400/10 flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <span class="text-[10px] font-mono uppercase text-sky-600 dark:text-sky-400">Meta de Sección • ${escapeHtml(m.category)}</span>
+                <p class="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate">${escapeHtml(m.title)}</p>
+              </div>
+              <button onclick="switchTab('roadmap')" class="text-[11px] font-mono text-sky-600 dark:text-sky-400 hover:underline shrink-0">Ver →</button>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      if (dayTasks.length > 0) {
+        html += `<div class="space-y-1.5">`;
+        dayTasks.forEach(t => {
+          const isDone = t.status === 'completed';
+          const isOverdue = !isDone && t.deadline < today;
+          const mod = state.modules.find(m => m.id === t.moduleId);
+          const badge = isDone
+            ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500">LISTA</span>'
+            : isOverdue
+            ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-500">VENCIDA</span>'
+            : t.priority === 'high'
+            ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500">ALTA</span>'
+            : '';
+
+          html += `
+            <div class="p-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-100 dark:border-zinc-800/80 flex items-start gap-2.5">
+              <button onclick="cycleTaskStatus('${t.id}')" class="mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${isDone ? 'bg-zinc-900 border-zinc-900 dark:bg-zinc-100 dark:border-zinc-100 text-white dark:text-zinc-950' : 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-500'}" title="Completar">
+                ${isDone ? '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+              </button>
+              <button onclick="openTaskDetail('${t.id}')" class="text-left min-w-0 flex-1 group space-y-0.5">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="text-xs font-medium leading-snug group-hover:underline ${isDone ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}">${escapeHtml(t.title)}</span>
+                  ${badge}
+                </div>
+                <p class="text-[10px] font-mono text-zinc-400 truncate">${mod ? escapeHtml(mod.category) : 'Tarea'} • Ver guía →</p>
+              </button>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      if (dayLogs.length > 0) {
+        html += `<div class="space-y-1.5 pt-1">`;
+        dayLogs.forEach(l => {
+          html += `
+            <div class="p-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 space-y-1">
+              <div class="flex items-center justify-between text-[10px] font-mono">
+                <span class="text-emerald-600 dark:text-emerald-400 uppercase">Sesión Registrada</span>
+                <span class="text-emerald-600 dark:text-emerald-400 font-semibold">+${Number(l.hours).toFixed(1)}h</span>
+              </div>
+              <p class="text-xs text-zinc-700 dark:text-zinc-300 leading-snug">${escapeHtml(l.note)}</p>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      contentEl.innerHTML = html;
+    }
+
+    function renderMonthlyAgenda(monthPrefix) {
+      const listEl = document.getElementById('cal-month-agenda-list');
+      const countEl = document.getElementById('cal-month-agenda-count');
+      if (!listEl || !countEl) return;
+
+      const today = todayISO();
+      const events = [];
+
+      state.tasks.forEach(t => {
+        if (t.deadline && t.deadline.startsWith(monthPrefix)) {
+          const mod = state.modules.find(m => m.id === t.moduleId);
+          events.push({
+            type: 'task',
+            date: t.deadline,
+            id: t.id,
+            title: t.title,
+            category: mod ? mod.category : 'TAREA',
+            priority: t.priority,
+            completed: t.status === 'completed'
+          });
+        }
+      });
+
+      state.modules.forEach(m => {
+        if (m.targetDate && m.targetDate.startsWith(monthPrefix)) {
+          events.push({
+            type: 'module',
+            date: m.targetDate,
+            id: m.id,
+            title: `Meta: ${m.title}`,
+            category: m.category
+          });
+        }
+      });
+
+      events.sort((a, b) => a.date.localeCompare(b.date) || (a.type === 'module' ? 1 : -1));
+      countEl.textContent = `${events.length} ${events.length === 1 ? 'evento' : 'eventos'}`;
+
+      if (events.length === 0) {
+        listEl.innerHTML = `<p class="text-xs font-mono text-zinc-400 py-4 text-center">No hay tareas ni metas programadas para este mes.</p>`;
+        return;
+      }
+
+      listEl.innerHTML = events.map(ev => {
+        if (ev.type === 'module') {
+          return `
+            <button onclick="selectCalendarDate('${ev.date}')" class="w-full py-2.5 flex items-center justify-between gap-2.5 text-left hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition-colors">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-2 h-2 rounded-full bg-sky-400 shrink-0"></span>
+                <div class="min-w-0">
+                  <p class="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate">${escapeHtml(ev.title)}</p>
+                  <span class="text-[10px] font-mono text-sky-600 dark:text-sky-400">${escapeHtml(ev.category)}</span>
+                </div>
+              </div>
+              <span class="text-[11px] font-mono text-zinc-400 shrink-0">${formatShortDate(ev.date)}</span>
+            </button>
+          `;
+        }
+
+        const isOverdue = !ev.completed && ev.date < today;
+        const dotClass = ev.completed
+          ? 'bg-emerald-500'
+          : isOverdue
+          ? 'bg-red-500'
+          : ev.priority === 'high'
+          ? 'bg-amber-500'
+          : 'bg-zinc-400 dark:bg-zinc-300';
+        const dateClass = ev.completed
+          ? 'text-emerald-600 dark:text-emerald-400'
+          : isOverdue
+          ? 'text-red-500'
+          : 'text-zinc-400';
+
+        return `
+          <button onclick="openTaskDetail('${ev.id}')" class="w-full py-2.5 flex items-center justify-between gap-2.5 text-left hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition-colors group">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-2 h-2 rounded-full ${dotClass} shrink-0"></span>
+              <div class="min-w-0">
+                <p class="text-xs font-medium truncate group-hover:underline ${ev.completed ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}">${escapeHtml(ev.title)}</p>
+                <span class="text-[10px] font-mono text-zinc-400">${escapeHtml(ev.category)}</span>
+              </div>
+            </div>
+            <span class="text-[11px] font-mono shrink-0 ${dateClass}">${formatShortDate(ev.date)} →</span>
+          </button>
+        `;
+      }).join('');
     }
 
     async function saveModule() {
@@ -1771,7 +2204,7 @@ jobs:
       showToast('Sección eliminada.', 'zinc');
     }
 
-    function openTaskModal(preselectedModuleId = null) {
+    function openTaskModal(preselectedModuleId = null, preselectedDate = null) {
       if (state.modules.length === 0) {
         showToast('Primero crea una sección de estudio.', 'amber');
         openModuleModal();
@@ -1784,7 +2217,7 @@ jobs:
 
       document.getElementById('task-title').value = '';
       document.getElementById('task-desc').value = '';
-      document.getElementById('task-deadline').value = offsetDateISO(3);
+      document.getElementById('task-deadline').value = preselectedDate || offsetDateISO(3);
       document.getElementById('task-priority').value = 'medium';
 
       const modal = document.getElementById('modal-task');
