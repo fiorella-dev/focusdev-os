@@ -2,8 +2,9 @@
 <html lang="es" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>FocusDev // Study OS</title>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Cliente Oficial de Supabase v2 -->
@@ -33,11 +34,17 @@
           }
         }
       }
-    }
+    };
   </script>
 
   <style>
-    /* Scrollbar minimalista y sobrio */
+    /* Prevención global de desbordamiento horizontal */
+    html, body {
+      overflow-x: hidden;
+      max-width: 100%;
+    }
+
+    /* Scrollbar minimalista */
     ::-webkit-scrollbar {
       width: 4px;
       height: 4px;
@@ -53,34 +60,87 @@
       background: rgba(113, 113, 122, 0.6);
     }
 
-    /* Simulación exacta para Samsung Galaxy A17 (360px CSS viewport) desde laptop */
+    /* =====================================================================
+       REGLAS EXPLÍCITAS RESPONSIVE (SAMSUNG GALAXY A17 360PX Y ESCRITORIO)
+       Garantiza que la vista móvil nunca muestre el sidebar ni oculte el nav
+       ===================================================================== */
+    @media (max-width: 767px) {
+      #desktop-sidebar {
+        display: none !important;
+      }
+      #mobile-topbar {
+        display: flex !important;
+      }
+      #mobile-bottom-nav {
+        display: grid !important;
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 9999 !important;
+        height: 64px !important;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      #main-content {
+        padding: 0.875rem 0.875rem 5.5rem 0.875rem !important;
+      }
+    }
+
+    @media (min-width: 768px) {
+      #desktop-sidebar {
+        display: flex !important;
+      }
+      #mobile-topbar {
+        display: none !important;
+      }
+      #mobile-bottom-nav {
+        display: none !important;
+      }
+    }
+
+    /* =====================================================================
+       SIMULADOR DE VISTA MÓVIL (A17 360PX) DESDE LAPTOP
+       Se declara después de los @media para sobrescribir escritorio
+       ===================================================================== */
     body.force-mobile-view #app-shell {
       max-width: 360px;
-      margin: 1rem auto;
+      height: 780px;
       min-height: 780px;
-      max-height: 840px;
+      margin: 1rem auto;
       border-radius: 26px;
       border: 1px solid rgba(113, 113, 122, 0.35);
       box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.55);
-      overflow-y: auto;
-      overflow-x: hidden;
+      overflow: hidden;
+      display: flex !important;
+      flex-direction: column !important;
       position: relative;
-      display: flex;
-      flex-direction: column;
     }
     body.force-mobile-view #desktop-sidebar {
       display: none !important;
     }
     body.force-mobile-view #mobile-topbar {
       display: flex !important;
-    }
-    body.force-mobile-view #mobile-bottom-nav {
-      display: flex !important;
-      position: sticky;
-      bottom: 0;
+      flex-shrink: 0;
     }
     body.force-mobile-view #main-content {
-      padding: 0.875rem 0.875rem 5.5rem 0.875rem !important;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 0.875rem 0.875rem 1.25rem 0.875rem !important;
+    }
+    body.force-mobile-view #mobile-bottom-nav {
+      display: grid !important;
+      grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+      position: relative !important;
+      bottom: auto !important;
+      left: auto !important;
+      right: auto !important;
+      flex-shrink: 0;
+      width: 100%;
+      height: 64px !important;
+      z-index: 30 !important;
     }
     body.force-mobile-view .sim-grid-cols {
       grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
@@ -92,6 +152,7 @@
       margin: 0 auto;
     }
 
+    /* Transición suave al cambiar de vista */
     .fade-in {
       animation: fadeIn 0.16s ease-out forwards;
     }
@@ -101,24 +162,26 @@
     }
   </style>
 </head>
-<body class="bg-zinc-50 text-zinc-900 dark:bg-[#09090b] dark:text-zinc-100 font-sans antialiased selection:bg-zinc-800 selection:text-white dark:selection:bg-zinc-200 dark:selection:text-zinc-950 transition-colors duration-200 overflow-x-hidden">
+<body class="bg-zinc-50 text-zinc-900 dark:bg-[#09090b] dark:text-zinc-100 font-sans antialiased selection:bg-zinc-800 selection:text-white dark:selection:bg-zinc-200 dark:selection:text-zinc-950 transition-colors duration-200">
 
-  <!-- BARRA SUPERIOR DE CONTROL (OPTIMIZADA PARA 360PX EN SAMSUNG A17) -->
-  <header class="w-full border-b border-zinc-200 dark:border-zinc-800/80 bg-white/85 dark:bg-[#0c0c0f]/90 backdrop-blur-md z-40 sticky top-0">
+  <!-- =====================================================================
+       BARRA SUPERIOR GLOBAL (OPTIMIZADA PARA 360PX Y ESCRITORIO)
+       ===================================================================== -->
+  <header class="w-full border-b border-zinc-200 dark:border-zinc-800/80 bg-white/90 dark:bg-[#0c0c0f]/95 backdrop-blur-md z-40 sticky top-0">
     <div class="max-w-[1440px] mx-auto px-3 sm:px-6 h-12 flex items-center justify-between gap-2 text-xs">
-      <!-- Identidad sobria + Estado de Conexión Supabase -->
+      <!-- Identidad + Estado de Conexión Supabase -->
       <div class="flex items-center gap-2 min-w-0">
         <span class="font-mono font-semibold tracking-tight text-[11px] sm:text-xs text-zinc-900 dark:text-zinc-100 whitespace-nowrap">FOCUSDEV // OS</span>
-        <button onclick="openConnectionModal()" id="conn-status-btn" class="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono px-2 py-0.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors whitespace-nowrap shrink-0" title="Estado de Supabase">
+        <button onclick="openConnectionModal()" id="conn-status-btn" class="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono px-2 py-0.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors whitespace-nowrap shrink-0" title="Configurar conexión a Supabase">
           <span id="conn-dot" class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
           <span id="conn-label">Modo Local</span>
         </button>
       </div>
 
-      <!-- Conmutador de Vista (Auto | Laptop | A17 360px) + Tema -->
+      <!-- Selector de Vista (solo escritorio) + Tema Claro/Oscuro -->
       <div class="flex items-center gap-1.5 shrink-0">
-        <div class="hidden sm:flex items-center bg-zinc-100 dark:bg-zinc-900 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800" role="group" aria-label="Selector de vista">
-          <button onclick="setViewportMode('auto')" id="btn-view-auto" class="px-2.5 py-1 rounded-md font-medium transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-2xs">Auto</button>
+        <div class="hidden md:flex items-center bg-zinc-100 dark:bg-zinc-900 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800" role="group" aria-label="Selector de vista">
+          <button onclick="setViewportMode('auto')" id="btn-view-auto" class="px-2.5 py-1 rounded-md font-medium transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100">Auto</button>
           <button onclick="setViewportMode('desktop')" id="btn-view-desktop" class="px-2.5 py-1 rounded-md font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all">Laptop</button>
           <button onclick="setViewportMode('mobile')" id="btn-view-mobile" class="px-2.5 py-1 rounded-md font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all">A17 (360px)</button>
         </div>
@@ -131,24 +194,26 @@
     </div>
   </header>
 
-  <!-- CONTENEDOR PRINCIPAL DE LA APLICACIÓN -->
+  <!-- =====================================================================
+       SHELL PRINCIPAL DE LA APLICACIÓN
+       ===================================================================== -->
   <div id="app-shell" class="max-w-[1440px] mx-auto min-h-[calc(100vh-3rem)] flex flex-col md:flex-row bg-zinc-50 dark:bg-[#09090b] transition-all duration-200">
 
-    <!-- ENCABEZADO MÓVIL COMPACTO -->
-    <div id="mobile-topbar" class="md:hidden flex items-center justify-between px-3.5 py-2.5 border-b border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-[#0c0c0f]">
-      <div class="min-w-0 pr-2">
+    <!-- ENCABEZADO MÓVIL COMPACTO (SOLO <= 767PX O MODO SIMULADO) -->
+    <div id="mobile-topbar" class="hidden items-center justify-between px-3.5 py-2.5 border-b border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-[#0c0c0f] shrink-0">
+      <button onclick="openGoalModal()" class="text-left min-w-0 pr-2 group" title="Editar meta principal">
         <p class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Plan Personal</p>
-        <h2 id="mobile-goal-heading" class="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">Ingeniería de Software</h2>
-      </div>
+        <h2 id="mobile-goal-heading" class="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate group-hover:underline">Meta: Desarrolladora de Software</h2>
+      </button>
       <span id="mobile-streak-pill" class="px-2 py-1 rounded-md text-[11px] font-mono bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 shrink-0">
         Racha: 0d
       </span>
     </div>
 
-    <!-- SIDEBAR LATERAL (VISTA LAPTOP / ESCRITORIO) -->
+    <!-- SIDEBAR LATERAL DE ESCRITORIO (ESTRICTAMENTE 5 PESTAÑAS ÚNICAS) -->
     <aside id="desktop-sidebar" class="hidden md:flex md:w-64 lg:w-72 shrink-0 flex-col justify-between border-r border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-[#0c0c0f] p-5 select-none">
       <div class="space-y-6">
-        <!-- Objetivo Principal Editable -->
+        <!-- Tarjeta de Objetivo Editable -->
         <div class="p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-zinc-50/70 dark:bg-zinc-900/50">
           <div class="flex items-center justify-between mb-1">
             <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Objetivo</span>
@@ -161,11 +226,11 @@
           </div>
         </div>
 
-        <!-- Navegación Principal -->
+        <!-- Navegación Principal (5 Pestañas Únicas — Sin Duplicados) -->
         <nav class="space-y-1" aria-label="Navegación principal">
           <button onclick="switchTab('dashboard')" id="nav-desk-dashboard" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors">
             <span class="flex items-center gap-2.5">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
               Panel General
             </span>
             <span class="font-mono text-[10px] opacity-60">01</span>
@@ -173,15 +238,15 @@
 
           <button onclick="switchTab('roadmap')" id="nav-desk-roadmap" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors">
             <span class="flex items-center gap-2.5">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
               Plan de Estudio
             </span>
-            <span id="badge-tasks-count" class="font-mono text-[10px] px-1.5 py-0.2 rounded bg-zinc-200/70 dark:bg-zinc-800">0</span>
+            <span id="badge-tasks-count" class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-800">0</span>
           </button>
 
           <button onclick="switchTab('calendar')" id="nav-desk-calendar" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors">
             <span class="flex items-center gap-2.5">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               Calendario
             </span>
             <span class="font-mono text-[10px] opacity-60">03</span>
@@ -189,30 +254,22 @@
 
           <button onclick="switchTab('deliverables')" id="nav-desk-deliverables" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors">
             <span class="flex items-center gap-2.5">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               Entregables
             </span>
-            <span id="badge-deliv-count" class="font-mono text-[10px] px-1.5 py-0.2 rounded bg-zinc-200/70 dark:bg-zinc-800">0</span>
+            <span id="badge-deliv-count" class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-800">0</span>
           </button>
 
           <button onclick="switchTab('settings')" id="nav-desk-settings" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors">
             <span class="flex items-center gap-2.5">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
-              Nube & Telegram
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+              Nube &amp; Telegram
             </span>
             <span class="font-mono text-[10px] opacity-60">05</span>
           </button>
-
-          <button onclick="switchTab('settings')" id="nav-desk-settings" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors">
-            <span class="flex items-center gap-2.5">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
-              Nube & Telegram
-            </span>
-            <span class="font-mono text-[10px] opacity-60">04</span>
-          </button>
         </nav>
 
-        <!-- Acciones Directas -->
+        <!-- Acciones Rápidas -->
         <div class="pt-4 border-t border-zinc-200 dark:border-zinc-800/80 space-y-2">
           <p class="text-[10px] font-mono uppercase tracking-wider text-zinc-400 px-1">Acciones</p>
           <button onclick="openTaskModal()" class="w-full py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-xs font-medium text-left flex items-center justify-between transition-colors">
@@ -230,33 +287,35 @@
       <div class="pt-4 border-t border-zinc-200 dark:border-zinc-800/80 space-y-2">
         <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400">
           <span>Base de Datos</span>
-          <button onclick="openConnectionModal()" id="sidebar-sync-label" class="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 underline">Configurar</button>
+          <button onclick="openConnectionModal()" id="sidebar-sync-label" class="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 underline">Conectar</button>
         </div>
         <div class="grid grid-cols-2 gap-1.5">
-          <button onclick="exportBackupJSON()" class="py-1.5 px-2 rounded border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 transition-colors">
+          <button onclick="exportBackupJSON()" class="py-1.5 px-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 transition-colors">
             Respaldo
           </button>
-          <button onclick="openResetConfirmModal()" class="py-1.5 px-2 rounded border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-500 hover:text-red-500 hover:border-red-500/40 transition-colors">
+          <button onclick="openResetConfirmModal()" class="py-1.5 px-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-500 hover:text-red-500 hover:border-red-500/40 transition-colors">
             Vaciar Local
           </button>
         </div>
       </div>
     </aside>
 
-    <!-- ÁREA DE CONTENIDO PRINCIPAL (OPTIMIZADO PARA 360PX MÓVIL Y ESCRITORIO) -->
-    <main id="main-content" class="flex-1 p-3.5 sm:p-6 lg:p-8 pb-24 md:pb-10 max-w-5xl w-full mx-auto space-y-5">
+    <!-- ===================================================================
+         CONTENIDO PRINCIPAL (TODAS LAS 6 VISTAS SON HIJOS DIRECTOS DE MAIN)
+         =================================================================== -->
+    <main id="main-content" class="flex-1 w-full p-3.5 sm:p-6 lg:p-8 pb-24 md:pb-10 max-w-5xl mx-auto space-y-5 min-w-0">
 
-      <!-- Banner de Notificaciones / Toast interno -->
+      <!-- Toast de Notificación Interna (Sin alert() nativos) -->
       <div id="toast-banner" class="hidden rounded-lg border px-3.5 py-2.5 text-xs font-medium flex items-center justify-between gap-2 transition-all">
         <span id="toast-text" class="leading-snug"></span>
         <button onclick="hideToast()" class="font-mono text-[11px] opacity-75 hover:opacity-100 shrink-0">Cerrar</button>
       </div>
 
-      <!-- =========================================================
-           SECCIÓN 1: PANEL GENERAL (DASHBOARD)
-           ========================================================= -->
+      <!-- =================================================================
+           VISTA 1: PANEL GENERAL (#view-dashboard)
+           ================================================================= -->
       <section id="view-dashboard" class="space-y-4 sm:space-y-5 fade-in">
-        <!-- Encabezado de Sección -->
+        <!-- Encabezado y Botón de Check-in Diario -->
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-4 border-b border-zinc-200 dark:border-zinc-800/80">
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-mono text-zinc-500 dark:text-zinc-400 mb-1">
@@ -269,13 +328,13 @@
             </h1>
           </div>
 
-          <button onclick="openCheckinModal()" id="btn-daily-checkin" class="w-full sm:w-auto justify-center px-4 py-2.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-xs font-medium hover:opacity-90 transition-all flex items-center gap-2 shadow-2xs shrink-0">
+          <button onclick="openCheckinModal()" id="btn-daily-checkin" class="w-full sm:w-auto justify-center px-4 py-2.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-xs font-medium hover:opacity-90 transition-all flex items-center gap-2 shrink-0">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 dark:bg-emerald-600"></span>
             Registrar estudio de hoy
           </button>
         </div>
 
-        <!-- Métricas Sobrias (3 Tarjetas) -->
+        <!-- 3 Tarjetas de Métricas -->
         <div class="sim-grid-cols grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="p-3.5 sm:p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114]">
             <div class="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 mb-1.5">
@@ -316,17 +375,17 @@
           </div>
         </div>
 
-        <!-- Bloque Dividido: Próximo Plazo + Temporizador -->
+        <!-- Próximo Plazo + Temporizador de Estudio -->
         <div class="sim-grid-cols grid grid-cols-1 lg:grid-cols-12 gap-3.5">
-          <!-- Próximo Entregable / Plazo -->
+          <!-- Tarjeta de Próximo Plazo -->
           <div class="lg:col-span-7 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] flex flex-col justify-between space-y-3.5">
             <div class="flex items-center justify-between gap-2">
               <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Próximo Plazo</span>
-              <span id="next-deadline-badge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 shrink-0">Sin plazos</span>
+              <span id="next-deadline-badge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 shrink-0">Al día</span>
             </div>
 
             <div id="next-deadline-card" class="space-y-1">
-              <!-- Se rellena dinámicamente -->
+              <!-- Rellenado dinámicamente -->
             </div>
 
             <div class="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 space-y-2.5">
@@ -342,19 +401,19 @@
             </div>
           </div>
 
-          <!-- Temporizador de Enfoque Sobrio -->
+          <!-- Tarjeta de Temporizador -->
           <div class="lg:col-span-5 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] flex flex-col justify-between space-y-3.5">
             <div class="flex items-center justify-between">
               <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Temporizador</span>
               <div class="flex items-center gap-1.5 text-[11px] font-mono">
-                <button onclick="setTimerPreset(25)" class="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:opacity-80">25m</button>
-                <button onclick="setTimerPreset(50)" class="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:opacity-80">50m</button>
+                <button onclick="setTimerPreset(25)" id="preset-25" class="px-2 py-0.5 rounded bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 hover:opacity-90">25m</button>
+                <button onclick="setTimerPreset(50)" id="preset-50" class="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:opacity-80">50m</button>
               </div>
             </div>
 
             <div>
               <div id="timer-display" class="text-3xl sm:text-4xl font-mono font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">25:00</div>
-              <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">Suma las horas automáticamente al terminar.</p>
+              <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">Suma automáticamente a tu bitácora al terminar.</p>
             </div>
 
             <div class="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 grid grid-cols-3 gap-2">
@@ -368,7 +427,7 @@
           </div>
         </div>
 
-        <!-- Lista de Tareas Próximas y Bitácora Reciente -->
+        <!-- Próximas Tareas + Bitácora Reciente -->
         <div class="sim-grid-cols grid grid-cols-1 lg:grid-cols-12 gap-3.5">
           <div class="lg:col-span-7 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] p-4 space-y-2.5">
             <div class="flex items-center justify-between">
@@ -382,19 +441,19 @@
 
           <div class="lg:col-span-5 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] p-4 space-y-2.5">
             <div class="flex items-center justify-between">
-              <h2 class="text-[11px] font-semibold uppercase tracking-wider font-mono text-zinc-500 dark:text-zinc-400">Bitácora</h2>
-              <span class="text-[11px] font-mono text-zinc-400">Reciente</span>
+              <h2 class="text-[11px] font-semibold uppercase tracking-wider font-mono text-zinc-500 dark:text-zinc-400">Bitácora Reciente</h2>
+              <span class="text-[11px] font-mono text-zinc-400">Últimas sesiones</span>
             </div>
             <div id="dashboard-logs-list" class="space-y-2">
-              <!-- Logs diarios -->
+              <!-- Sesiones diarias -->
             </div>
           </div>
         </div>
       </section>
 
-      <!-- =========================================================
-           SECCIÓN 2: PLAN DE ESTUDIO Y TAREAS AUTOASIGNADAS
-           ========================================================= -->
+      <!-- =================================================================
+           VISTA 2: PLAN DE ESTUDIO (#view-roadmap)
+           ================================================================= -->
       <section id="view-roadmap" class="space-y-4 sm:space-y-5 hidden fade-in">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-200 dark:border-zinc-800/80">
           <div>
@@ -402,7 +461,7 @@
               Plan de Estudio
             </h1>
           </div>
-          <!-- Botones en grilla 50/50 en móvil para que jamás se superpongan -->
+          <!-- Botones en grilla 50/50 en móvil para 360px -->
           <div class="grid grid-cols-2 sm:flex items-center gap-2 w-full sm:w-auto">
             <button onclick="openModuleModal()" class="py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-center">
               + Sección
@@ -413,27 +472,27 @@
           </div>
         </div>
 
-        <!-- Filtro de estado limpio -->
+        <!-- Filtros de Tareas -->
         <div class="flex items-center gap-1.5 text-xs overflow-x-auto pb-1">
           <button onclick="setTaskFilter('all')" id="filter-all" class="px-3 py-1.5 rounded-lg font-medium bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 shrink-0">Todas</button>
           <button onclick="setTaskFilter('pending')" id="filter-pending" class="px-3 py-1.5 rounded-lg font-medium text-zinc-500 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 shrink-0">Pendientes</button>
           <button onclick="setTaskFilter('completed')" id="filter-completed" class="px-3 py-1.5 rounded-lg font-medium text-zinc-500 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 shrink-0">Completadas</button>
         </div>
 
-        <!-- Contenedor de Módulos y sus Tareas -->
+        <!-- Módulos y Tareas -->
         <div id="roadmap-modules-container" class="space-y-3.5">
           <!-- Renderizado dinámicamente -->
         </div>
       </section>
 
-      <!-- =========================================================
-           SECCIÓN 2B: CALENDARIO DE FECHAS Y CRONOGRAMA MENSUAL
-           ========================================================= -->
+      <!-- =================================================================
+           VISTA 3: CALENDARIO (#view-calendar)
+           ================================================================= -->
       <section id="view-calendar" class="space-y-4 sm:space-y-5 hidden fade-in">
-        <!-- Encabezado con Mes/Año y controles compactos -->
+        <!-- Encabezado y navegación de meses -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-200 dark:border-zinc-800/80">
           <div class="min-w-0">
-            <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Agenda de Plazos</span>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Calendario de Estudio</span>
             <h1 id="cal-month-title" class="text-lg sm:text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 capitalize">
               --
             </h1>
@@ -441,84 +500,79 @@
 
           <div class="grid grid-cols-3 sm:flex items-center gap-1.5 w-full sm:w-auto">
             <button onclick="changeCalendarMonth(-1)" class="py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-mono text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-center" aria-label="Mes anterior">
-              &lt;
+              ← Ant
             </button>
             <button onclick="goToCalendarToday()" class="py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-center">
               Hoy
             </button>
             <button onclick="changeCalendarMonth(1)" class="py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-mono text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-center" aria-label="Mes siguiente">
-              &gt;
+              Sig →
             </button>
           </div>
         </div>
 
-        <!-- Bloque Principal: Cuadrícula Mensual (7 cols) + Detalle del Día (5 cols) -->
-        <div class="sim-grid-cols grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <!-- Cuadrícula Mensual -->
-          <div class="lg:col-span-7 p-3.5 sm:p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-3">
-            <!-- Días de la semana empezando en Lunes -->
-            <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-mono uppercase tracking-wider text-zinc-400 pb-1">
-              <span>L</span>
-              <span>M</span>
-              <span>X</span>
-              <span>J</span>
-              <span>V</span>
-              <span>S</span>
-              <span>D</span>
-            </div>
-
-            <!-- Celdas de días -->
-            <div id="cal-days-grid" class="grid grid-cols-7 gap-1">
-              <!-- Renderizado dinámicamente -->
-            </div>
-
-            <!-- Leyenda discreta de indicadores -->
-            <div class="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] font-mono text-zinc-500 dark:text-zinc-400">
-              <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Vencida</span>
-              <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Alta</span>
-              <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-300"></span>Pendiente</span>
-              <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Cumplido</span>
-              <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>Meta módulo</span>
-            </div>
+        <!-- Cuadrícula Mensual (Lunes a Domingo) -->
+        <div class="p-3.5 sm:p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-3">
+          <!-- Leyenda sobria de indicadores -->
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono text-zinc-500 dark:text-zinc-400 pb-2 border-b border-zinc-100 dark:border-zinc-800/80">
+            <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Pendiente</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Vencida</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Completada</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>Meta sección</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-violet-400"></span>Estudio</span>
           </div>
 
-          <!-- Panel de Detalle del Día Seleccionado -->
-          <div class="lg:col-span-5 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] flex flex-col justify-between space-y-3.5">
-            <div class="space-y-3.5">
-              <div class="flex items-start justify-between gap-2 pb-3 border-b border-zinc-100 dark:border-zinc-800/80">
-                <div class="min-w-0">
-                  <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Detalle del Día</span>
-                  <h2 id="cal-selected-date-label" class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 leading-snug capitalize">
-                    --
-                  </h2>
-                </div>
-                <button onclick="openTaskModal(null, calSelectedDate)" class="px-2.5 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-xs font-medium hover:opacity-90 transition-opacity shrink-0">
-                  + Tarea
-                </button>
-              </div>
+          <!-- Encabezado de días (Lunes primero) -->
+          <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-mono uppercase tracking-wider text-zinc-400">
+            <span>L</span>
+            <span>M</span>
+            <span>X</span>
+            <span>J</span>
+            <span>V</span>
+            <span>S</span>
+            <span>D</span>
+          </div>
 
-              <div id="cal-selected-day-content" class="space-y-2.5">
-                <!-- Tareas, metas y sesiones del día seleccionado -->
-              </div>
-            </div>
+          <!-- Celdas de días -->
+          <div id="cal-days-grid" class="grid grid-cols-7 gap-1">
+            <!-- Renderizado dinámicamente -->
           </div>
         </div>
 
-        <!-- Cronograma Completo del Mes Visible -->
+        <!-- Panel del Día Seleccionado (debajo de la cuadrícula) -->
+        <div class="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-3.5">
+          <div class="flex items-center justify-between gap-2 pb-3 border-b border-zinc-100 dark:border-zinc-800/80">
+            <div class="min-w-0">
+              <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Día Seleccionado</span>
+              <h2 id="cal-selected-date-label" class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 leading-snug capitalize truncate">
+                --
+              </h2>
+            </div>
+            <button onclick="openTaskModal(null, calSelectedDate)" class="px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-xs font-medium hover:opacity-90 transition-opacity shrink-0">
+              + Tarea
+            </button>
+          </div>
+
+          <div id="cal-selected-day-content" class="space-y-2.5">
+            <!-- Tareas, metas y sesiones del día -->
+          </div>
+        </div>
+
+        <!-- Cronograma del Mes Visible -->
         <div class="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-3">
           <div class="flex items-center justify-between gap-2 pb-2 border-b border-zinc-100 dark:border-zinc-800/80">
-            <h2 class="text-[11px] font-semibold uppercase tracking-wider font-mono text-zinc-500 dark:text-zinc-400">Cronograma del Mes</h2>
+            <h2 class="text-[11px] font-semibold uppercase tracking-wider font-mono text-zinc-500 dark:text-zinc-400">Cronograma del mes</h2>
             <span id="cal-month-agenda-count" class="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500">0 eventos</span>
           </div>
           <div id="cal-month-agenda-list" class="divide-y divide-zinc-100 dark:divide-zinc-800/80">
-            <!-- Lista cronológica de todas las fechas del mes -->
+            <!-- Lista cronológica del mes -->
           </div>
         </div>
       </section>
 
-      <!-- =========================================================
-           SECCIÓN 3: ENTREGABLES Y ARCHIVOS SUBIDOS
-           ========================================================= -->
+      <!-- =================================================================
+           VISTA 4: ENTREGABLES (#view-deliverables)
+           ================================================================= -->
       <section id="view-deliverables" class="space-y-4 sm:space-y-5 hidden fade-in">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-200 dark:border-zinc-800/80">
           <div>
@@ -531,20 +585,20 @@
           </button>
         </div>
 
-        <!-- Listado de Entregables -->
+        <!-- Cuadrícula de Entregables -->
         <div id="deliverables-list" class="sim-grid-cols grid grid-cols-1 md:grid-cols-2 gap-3.5">
           <!-- Renderizado dinámicamente -->
         </div>
       </section>
 
-      <!-- =========================================================
-           SECCIÓN 4: NUBE (SUPABASE) & NOTIFICACIONES POR TELEGRAM
-           ========================================================= -->
+      <!-- =================================================================
+           VISTA 5: NUBE & TELEGRAM (#view-settings)
+           ================================================================= -->
       <section id="view-settings" class="space-y-4 sm:space-y-5 hidden fade-in">
         <div class="pb-4 border-b border-zinc-200 dark:border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h1 class="text-lg sm:text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-              Nube & Alertas por Telegram
+              Nube &amp; Alertas por Telegram
             </h1>
           </div>
           <button onclick="syncLocalToCloud()" id="btn-sync-cloud" class="w-full sm:w-auto py-2 px-3.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-mono text-zinc-700 dark:text-zinc-200 hover:border-zinc-400 transition-colors text-center">
@@ -553,7 +607,7 @@
         </div>
 
         <div class="sim-grid-cols grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <!-- Tarjeta 1: Conexión a Supabase -->
+          <!-- Tarjeta 1: Supabase PostgreSQL -->
           <div class="rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] p-4 space-y-3.5">
             <div class="flex items-center justify-between gap-2">
               <h2 class="text-xs font-semibold uppercase tracking-wider font-mono text-zinc-700 dark:text-zinc-200">1. Supabase PostgreSQL</h2>
@@ -582,7 +636,7 @@
             </div>
           </div>
 
-          <!-- Tarjeta 2: Alertas Reales por Telegram -->
+          <!-- Tarjeta 2: Bot de Telegram -->
           <div class="rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] p-4 space-y-3.5">
             <div class="flex items-center justify-between gap-2">
               <h2 class="text-xs font-semibold uppercase tracking-wider font-mono text-zinc-700 dark:text-zinc-200">2. Bot de Telegram</h2>
@@ -606,9 +660,9 @@
                 </div>
               </div>
 
-              <div class="flex items-center justify-between pt-1">
+              <div class="flex items-center justify-between pt-1 gap-2">
                 <span class="text-xs text-zinc-600 dark:text-zinc-300">Alerta automática si no he estudiado</span>
-                <input id="input-reminder-enabled" type="checkbox" checked class="w-4 h-4 accent-zinc-900 dark:accent-zinc-100 rounded" />
+                <input id="input-reminder-enabled" type="checkbox" checked class="w-4 h-4 accent-zinc-900 dark:accent-zinc-100 rounded shrink-0" />
               </div>
             </div>
 
@@ -623,24 +677,23 @@
           </div>
         </div>
 
-        <!-- Desplegable compacto para automatización 24/7 con GitHub Actions (No estorba en móvil) -->
+        <!-- Desplegable con Workflow de GitHub Actions -->
         <details class="rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] overflow-hidden">
           <summary class="px-4 py-3 text-xs font-mono text-zinc-600 dark:text-zinc-300 cursor-pointer select-none flex items-center justify-between hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
-            <span>Ver código para alerta automática 24/7 (GitHub Actions + SQL)</span>
+            <span>Alerta automática 24/7 (GitHub Actions YAML)</span>
             <span class="text-zinc-400">▼</span>
           </summary>
-          <div class="p-4 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-            <div class="space-y-2">
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-[11px] font-mono text-zinc-400">.github/workflows/study_reminder.yml</span>
-                <button onclick="copyCodeBlock('code-gh-action')" class="px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 shrink-0">
-                  Copiar YAML
-                </button>
-              </div>
-              <pre id="code-gh-action" class="p-3 rounded-lg bg-zinc-950 text-zinc-200 font-mono text-[10px] overflow-x-auto max-h-48 leading-relaxed border border-zinc-800">name: Recordatorio Diario FocusDev
+          <div class="p-4 border-t border-zinc-100 dark:border-zinc-800 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[11px] font-mono text-zinc-400 truncate">.github/workflows/study_reminder.yml</span>
+              <button onclick="copyCodeBlock('code-gh-action')" class="px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 shrink-0">
+                Copiar YAML
+              </button>
+            </div>
+            <pre id="code-gh-action" class="p-3 rounded-lg bg-zinc-950 text-zinc-200 font-mono text-[10px] overflow-x-auto max-h-48 leading-relaxed border border-zinc-800">name: Recordatorio Diario
 on:
   schedule:
-    - cron: '0 0 * * *' # 8:00 PM Venezuela (UTC-4)
+    - cron: '0 0 * * *' # 8:00 PM hora Venezuela (UTC-4)
   workflow_dispatch:
 
 jobs:
@@ -656,25 +709,34 @@ jobs:
         run: |
           python3 -c "
           import os, urllib.request, json
-          url = f'{os.environ[\"SUPABASE_URL\"]}/rest/v1/tasks?completed=eq.false&select=title,due_date&order=due_date.asc&limit=4'
+          url = f'{os.environ[\"SUPABASE_URL\"]}/rest/v1/tasks?completed=eq.false&amp;select=title,due_date&amp;order=due_date.asc&amp;limit=4'
           req = urllib.request.Request(url, headers={'apikey': os.environ['SUPABASE_KEY'], 'Authorization': f'Bearer {os.environ[\"SUPABASE_KEY\"]}'})
           tasks = json.loads(urllib.request.urlopen(req).read().decode())
-          resumen = '\n'.join([f'• {t[\"title\"]} ({t[\"due_date\"]})' for t in tasks]) or 'Sin tareas pendientes.'
-          msg = f'Hora de estudiar hoy.\n\nPróximos plazos:\n{resumen}'
+          resumen = '\n'.join([f'• {t[\"title\"]} ({t[\"due_date\"]})' for t in tasks]) or '• Sin tareas pendientes.'
+          msg = f'Hora de estudiar hoy.\n\nPróximos entregables:\n{resumen}'
           tg_url = f'https://api.telegram.org/bot{os.environ[\"TG_BOT_TOKEN\"]}/sendMessage'
           data = json.dumps({'chat_id': os.environ['TG_CHAT_ID'], 'text': msg}).encode()
           urllib.request.urlopen(urllib.request.Request(tg_url, data=data, headers={'Content-Type': 'application/json'}))
           "</pre>
-            </div>
           </div>
         </details>
+
+        <!-- Utilidades locales accesibles también desde móvil -->
+        <div class="md:hidden grid grid-cols-2 gap-2 pt-1">
+          <button onclick="exportBackupJSON()" class="py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#111114] text-xs font-mono text-zinc-500">
+            Respaldo JSON
+          </button>
+          <button onclick="openResetConfirmModal()" class="py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#111114] text-xs font-mono text-red-500">
+            Vaciar Local
+          </button>
+        </div>
       </section>
 
-      <!-- =========================================================
-           SECCIÓN 5: VISTA DE DETALLE DE TAREA (GUÍA TÉCNICA & ENTREGAS)
-           ========================================================= -->
+      <!-- =================================================================
+           VISTA 6: DETALLE DE TAREA (#view-task-detail)
+           ================================================================= -->
       <section id="view-task-detail" class="space-y-4 sm:space-y-5 hidden fade-in">
-        <!-- Barra superior de retorno y metadatos -->
+        <!-- Retorno y metadatos -->
         <div class="flex flex-wrap items-center justify-between gap-2 pb-3.5 border-b border-zinc-200 dark:border-zinc-800/80">
           <button onclick="goBackFromTaskDetail()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-mono text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
             <span>←</span>
@@ -682,13 +744,13 @@ jobs:
           </button>
 
           <div class="flex flex-wrap items-center gap-1.5">
-            <span id="detail-task-module-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">QUINCENA</span>
+            <span id="detail-task-module-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">SECCIÓN</span>
             <span id="detail-task-priority-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500">MEDIA</span>
             <span id="detail-task-deadline-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500">--</span>
           </div>
         </div>
 
-        <!-- Encabezado de la Tarea y Botones 50/50 para Samsung A17 -->
+        <!-- Cabecera de Tarea + Botones 50/50 -->
         <div class="p-4 sm:p-5 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-4">
           <div class="space-y-1.5">
             <div class="flex items-center justify-between gap-2">
@@ -700,82 +762,93 @@ jobs:
             </h1>
           </div>
 
-          <!-- Botones de acción 50/50 sin superposición en 360px -->
           <div class="grid grid-cols-2 gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
             <button id="detail-btn-toggle" onclick="toggleCurrentDetailTask()" class="py-2.5 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-xs font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-center">
-              ✓ Completar tarea
+              Marcar completada
             </button>
             <button id="detail-btn-upload" onclick="openDeliverableForCurrentDetailTask()" class="py-2.5 px-3 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-xs font-medium hover:opacity-90 transition-opacity text-center">
-              ↑ Subir entregable
+              ↑ Subir entrega
             </button>
           </div>
         </div>
 
-        <!-- Contenedor estructurado de la descripción traída de la Base de Datos -->
-        <div id="detail-task-body" class="space-y-3.5">
-          <!-- Renderizado dinámicamente desde task.description en Supabase -->
+        <!-- Encabezado de Descripción + Botón Inline para Editar -->
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Guía / Descripción</span>
+          <button id="btn-toggle-desc-editor" onclick="toggleDescriptionEditor()" class="px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#111114] text-[11px] font-mono text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+            Editar descripción
+          </button>
         </div>
 
-        <!-- Entregables vinculados a esta tarea -->
+        <!-- Editor Inline de Descripción (oculto hasta pulsar Editar descripción) -->
+        <div id="detail-desc-editor-box" class="hidden p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-3">
+          <textarea id="detail-task-desc-editor" rows="8" placeholder="Escribe aquí la descripción detallada o tus apuntes de estudio..." class="w-full p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 font-sans leading-relaxed focus:outline-none focus:border-zinc-400"></textarea>
+          <div class="grid grid-cols-2 sm:flex sm:justify-end gap-2">
+            <button onclick="toggleDescriptionEditor(false)" class="py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500">
+              Cancelar
+            </button>
+            <button onclick="saveTaskDescriptionFromDetail()" class="py-2 px-4 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-xs font-medium hover:opacity-90 transition-opacity">
+              Guardar en Supabase
+            </button>
+          </div>
+        </div>
+
+        <!-- Tarjetas Estructuradas de la Descripción (leídas desde tasks.description) -->
+        <div id="detail-task-body" class="space-y-3">
+          <!-- Renderizado dinámicamente -->
+        </div>
+
+        <!-- Entregables Vinculados -->
         <div class="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-3">
           <div class="flex items-center justify-between">
             <h2 class="text-[11px] font-semibold uppercase tracking-wider font-mono text-zinc-500 dark:text-zinc-400">Entregables de esta tarea</h2>
             <button onclick="openDeliverableForCurrentDetailTask()" class="text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 underline">+ Adjuntar</button>
           </div>
           <div id="detail-task-deliverables" class="space-y-2">
-            <!-- Lista de entregables de esta tarea -->
+            <!-- Lista de entregables -->
           </div>
         </div>
+      </section>
 
-        <!-- Editor desplegable para modificar la guía o agregar apuntes personales -->
-        <details id="detail-edit-notes-box" class="rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] overflow-hidden">
-          <summary class="px-4 py-3 text-xs font-mono text-zinc-600 dark:text-zinc-300 cursor-pointer select-none flex items-center justify-between hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
-            <span>Editar descripción / Agregar mis apuntes de estudio</span>
-            <span class="text-zinc-400">▼</span>
-          </summary>
-          <div class="p-4 border-t border-zinc-100 dark:border-zinc-800 space-y-3">
-            <textarea id="detail-task-desc-editor" rows="7" placeholder="Escribe aquí la descripción detallada, pasos a aprender o tus apuntes..." class="w-full p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 font-sans leading-relaxed focus:outline-none focus:border-zinc-400"></textarea>
-            <div class="flex justify-end">
-              <button onclick="saveTaskDescriptionFromDetail()" class="py-2 px-4 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-xs font-medium hover:opacity-90 transition-opacity">
-                Guardar descripción en Base de Datos
-              </button>
-            </div>
-          </div>
-    <!-- BARRA DE NAVEGACIÓN INFERIOR (ESTILO APP ANDROID NATIVA — 5 ACCESOS PARA 360PX) -->
-    <nav id="mobile-bottom-nav" class="md:hidden fixed bottom-0 left-0 right-0 z-30 border-t border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-[#0c0c0f]/95 backdrop-blur-md flex items-center justify-around h-16 px-0.5">
-      <button onclick="switchTab('dashboard')" id="nav-mob-dashboard" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-medium gap-1 min-w-0">
+    </main>
+
+    <!-- ===================================================================
+         BARRA DE NAVEGACIÓN INFERIOR MÓVIL (HERMANO DE MAIN — 5 COLUMNAS)
+         =================================================================== -->
+    <nav id="mobile-bottom-nav" class="hidden grid-cols-5 border-t border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-[#0c0c0f]/95 backdrop-blur-md items-center h-16 px-0.5" aria-label="Navegación móvil">
+      <button onclick="switchTab('dashboard')" id="nav-mob-dashboard" class="flex flex-col items-center justify-center h-full py-1 text-[10px] font-medium gap-1 min-w-0">
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
         <span class="truncate">Inicio</span>
       </button>
 
-      <button onclick="switchTab('roadmap')" id="nav-mob-roadmap" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-medium gap-1 min-w-0">
+      <button onclick="switchTab('roadmap')" id="nav-mob-roadmap" class="flex flex-col items-center justify-center h-full py-1 text-[10px] font-medium gap-1 min-w-0">
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <span class="truncate">Plan</span>
       </button>
 
-      <button onclick="switchTab('calendar')" id="nav-mob-calendar" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-medium gap-1 min-w-0">
+      <button onclick="switchTab('calendar')" id="nav-mob-calendar" class="flex flex-col items-center justify-center h-full py-1 text-[10px] font-medium gap-1 min-w-0">
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span class="truncate">Fechas</span>
       </button>
 
-      <button onclick="switchTab('deliverables')" id="nav-mob-deliverables" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-medium gap-1 min-w-0">
+      <button onclick="switchTab('deliverables')" id="nav-mob-deliverables" class="flex flex-col items-center justify-center h-full py-1 text-[10px] font-medium gap-1 min-w-0">
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         <span class="truncate">Entregas</span>
       </button>
 
-      <button onclick="switchTab('settings')" id="nav-mob-settings" class="flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-medium gap-1 min-w-0">
-        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+      <button onclick="switchTab('settings')" id="nav-mob-settings" class="flex flex-col items-center justify-center h-full py-1 text-[10px] font-medium gap-1 min-w-0">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
         <span class="truncate">Nube</span>
       </button>
     </nav>
   </div>
 
-  <!-- =========================================================
-       MODALES INTERACTIVOS (ADAPTADOS A 360PX SIN DESBORDES)
-       ========================================================= -->
+  <!-- =====================================================================
+       MODALES INTERACTIVOS (ADAPTADOS A 360PX, CON CIERRE ESC)
+       ===================================================================== -->
 
-  <!-- MODAL 1: CREAR NUEVA SECCIÓN / MÓDULO -->
-  <div id="modal-module" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden items-center justify-center p-3.5">
+  <!-- MODAL 1: CREAR SECCIÓN / MÓDULO -->
+  <div id="modal-module" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[10000] hidden items-center justify-center p-3.5">
     <div class="w-full max-w-md rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121216] p-4 sm:p-5 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-3">
         <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Nueva Sección</h3>
@@ -789,16 +862,12 @@ jobs:
         <div class="grid grid-cols-2 gap-2.5">
           <div>
             <label class="block text-[10px] font-mono text-zinc-400 mb-1">ETIQUETA</label>
-            <input id="module-category" type="text" placeholder="Ej: BACKEND" class="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 font-mono text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none" />
+            <input id="module-category" type="text" placeholder="Ej: QUINCENA 01" class="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 font-mono text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none" />
           </div>
           <div>
             <label class="block text-[10px] font-mono text-zinc-400 mb-1">FECHA META</label>
             <input id="module-target-date" type="date" class="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 font-mono text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none" />
           </div>
-        </div>
-        <div>
-          <label class="block text-[10px] font-mono text-zinc-400 mb-1">NOTA BREVE (OPCIONAL)</label>
-          <input id="module-desc" type="text" placeholder="Ej: Rutas REST y despliegue" class="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none" />
         </div>
       </div>
       <div class="grid grid-cols-2 gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
@@ -808,9 +877,9 @@ jobs:
     </div>
   </div>
 
-  <!-- MODAL 2: CREAR / AUTOASIGNAR TAREA CON PLAZO -->
-  <div id="modal-task" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden items-center justify-center p-3.5">
-    <div class="w-full max-w-md rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121216] p-4 sm:p-5 shadow-2xl space-y-4">
+  <!-- MODAL 2: CREAR / ASIGNAR TAREA -->
+  <div id="modal-task" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[10000] hidden items-center justify-center p-3.5">
+    <div class="w-full max-w-md rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121216] p-4 sm:p-5 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-3">
         <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Asignar Tarea</h3>
         <button onclick="closeModal('modal-task')" class="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 text-xs font-mono">✕</button>
@@ -825,8 +894,8 @@ jobs:
           <input id="task-title" type="text" placeholder="Ej: Practicar consultas JOIN en PostgreSQL" class="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none" />
         </div>
         <div>
-          <label class="block text-[10px] font-mono text-zinc-400 mb-1">DETALLE (OPCIONAL)</label>
-          <textarea id="task-desc" rows="2" placeholder="Ej: Subir script .sql probado" class="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none"></textarea>
+          <label class="block text-[10px] font-mono text-zinc-400 mb-1">DESCRIPCIÓN (OPCIONAL)</label>
+          <textarea id="task-desc" rows="3" placeholder="Lo que debes aprender, programar o entregar..." class="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none"></textarea>
         </div>
         <div class="grid grid-cols-2 gap-2.5">
           <div>
@@ -850,8 +919,8 @@ jobs:
     </div>
   </div>
 
-  <!-- MODAL 3: SUBIR ENTREGABLE REAL -->
-  <div id="modal-deliverable" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden items-center justify-center p-3.5">
+  <!-- MODAL 3: SUBIR ENTREGABLE -->
+  <div id="modal-deliverable" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[10000] hidden items-center justify-center p-3.5">
     <div class="w-full max-w-md rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121216] p-4 sm:p-5 shadow-2xl space-y-3.5 max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-2.5">
         <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Subir Entregable</h3>
@@ -897,7 +966,7 @@ jobs:
   </div>
 
   <!-- MODAL 4: CHECK-IN DIARIO DE ESTUDIO -->
-  <div id="modal-checkin" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden items-center justify-center p-3.5">
+  <div id="modal-checkin" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[10000] hidden items-center justify-center p-3.5">
     <div class="w-full max-w-md rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121216] p-4 sm:p-5 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-3">
         <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Registrar Estudio de Hoy</h3>
@@ -910,7 +979,7 @@ jobs:
         </div>
         <div>
           <label class="block text-[10px] font-mono text-zinc-400 mb-1">¿QUÉ AVANZASTE?</label>
-          <textarea id="checkin-note" rows="3" placeholder="Ej: Consultas SQL y despliegue en GitHub Pages." class="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none"></textarea>
+          <textarea id="checkin-note" rows="3" placeholder="Ej: Práctica de bucles en Python y consultas SQL." class="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none"></textarea>
         </div>
       </div>
       <div class="grid grid-cols-2 gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
@@ -921,7 +990,7 @@ jobs:
   </div>
 
   <!-- MODAL 5: EDITAR META PRINCIPAL -->
-  <div id="modal-goal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden items-center justify-center p-3.5">
+  <div id="modal-goal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[10000] hidden items-center justify-center p-3.5">
     <div class="w-full max-w-sm rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121216] p-4 sm:p-5 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-3">
         <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Editar Meta</h3>
@@ -938,8 +1007,8 @@ jobs:
     </div>
   </div>
 
-  <!-- MODAL 6: CONFIGURACIÓN DE CONEXIÓN A SUPABASE -->
-  <div id="modal-connection" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden items-center justify-center p-3.5">
+  <!-- MODAL 6: CONEXIÓN A SUPABASE -->
+  <div id="modal-connection" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[10000] hidden items-center justify-center p-3.5">
     <div class="w-full max-w-md rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121216] p-4 sm:p-5 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-3">
         <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Conexión Supabase</h3>
@@ -962,15 +1031,15 @@ jobs:
     </div>
   </div>
 
-  <!-- MODAL 7: CONFIRMACIÓN PARA VACIAR BASE DE DATOS LOCAL -->
-  <div id="modal-reset-confirm" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden items-center justify-center p-3.5">
+  <!-- MODAL 7: CONFIRMAR VACIADO LOCAL -->
+  <div id="modal-reset-confirm" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[10000] hidden items-center justify-center p-3.5">
     <div class="w-full max-w-sm rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121216] p-4 sm:p-5 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-3">
         <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Vaciar Datos Locales</h3>
         <button onclick="closeModal('modal-reset-confirm')" class="text-zinc-400 text-xs font-mono">✕</button>
       </div>
       <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-        Se limpiará la caché local de este navegador. Tus datos en Supabase no se borrarán.
+        Se limpiará la caché local de este navegador. Tus datos guardados en Supabase no se borrarán.
       </p>
       <div class="grid grid-cols-2 gap-2 pt-2">
         <button onclick="closeModal('modal-reset-confirm')" class="py-2 px-3 rounded-lg text-xs text-zinc-500 border border-zinc-200 dark:border-zinc-800">Cancelar</button>
@@ -979,10 +1048,11 @@ jobs:
     </div>
   </div>
 
-  <!-- =========================================================
-       LÓGICA DE APLICACIÓN, SUPABASE (`CloudService`) Y TELEGRAM
-       ========================================================= -->
+  <!-- =====================================================================
+       LÓGICA DE APLICACIÓN, SUPABASE POSTGRESQL/STORAGE Y TELEGRAM
+       ===================================================================== -->
   <script>
+    // Claves exactas de localStorage (preservan credenciales existentes)
     const STORAGE_KEY = 'focusdev_study_os_clean_v2';
     const SUPABASE_URL_KEY = 'focusdev_supabase_url';
     const SUPABASE_ANON_KEY = 'focusdev_supabase_anon_key';
@@ -990,11 +1060,14 @@ jobs:
     const TG_CHAT_KEY = 'focusdev_tg_chat_id';
     const TG_LAST_AUTO_KEY = 'focusdev_last_tg_auto_date';
 
-    function formatLocalISO(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
+    // ===================================================================
+    // FECHAS EN HORA LOCAL (SIN DESFASE UTC DESPUÉS DE LAS 8:00 PM UTC-4)
+    // ===================================================================
+    function formatLocalISO(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
     }
 
     function todayISO() {
@@ -1007,12 +1080,7 @@ jobs:
       return formatLocalISO(d);
     }
 
-    function offsetDateISO(days) {
-      const d = new Date();
-      d.setDate(d.getDate() + days);
-      return d.toISOString().split('T')[0];
-    }
-
+    // Estado inicial 100% limpio (sin datos quemados)
     function getCleanEmptyState() {
       return {
         goal: 'Meta: Desarrolladora de Software',
@@ -1040,7 +1108,8 @@ jobs:
           deliverables: Array.isArray(parsed.deliverables) ? parsed.deliverables : [],
           studyLogs: Array.isArray(parsed.studyLogs) ? parsed.studyLogs : []
         };
-      } catch (e) {
+      } catch (err) {
+        console.warn('Error leyendo estado local:', err);
         return getCleanEmptyState();
       }
     }
@@ -1048,8 +1117,8 @@ jobs:
     function saveLocalStateOnly() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch (e) {
-        console.warn('No se pudo escribir en localStorage:', e);
+      } catch (err) {
+        console.warn('No se pudo guardar en localStorage:', err);
       }
     }
 
@@ -1058,28 +1127,35 @@ jobs:
       renderAll();
     }
 
+    // Estado de sesión en memoria
     let state = loadLocalState();
     let currentTab = 'dashboard';
     let previousTabBeforeDetail = 'roadmap';
     let currentDetailTaskId = null;
     let currentTaskFilter = 'all';
+
+    // Estado del Calendario
     let calViewYear = new Date().getFullYear();
     let calViewMonth = new Date().getMonth();
     let calSelectedDate = todayISO();
+
+    // Estado de carga de archivos y cliente único de Supabase
     let selectedFileBuffer = null;
     let selectedRawFile = null;
     let supabaseClient = null;
+    let supabaseClientUrl = '';
+    let supabaseClientKey = '';
     let supabaseOnline = false;
 
-    // Variables del Temporizador
+    // Estado del Temporizador
     let timerSeconds = 25 * 60;
     let timerInitialMinutes = 25;
     let timerInterval = null;
     let timerRunning = false;
 
-    // =========================================================
-    // CAPA DE INTEGRACIÓN CON SUPABASE (POSTGRESQL + STORAGE)
-    // =========================================================
+    // ===================================================================
+    // INTEGRACIÓN CON SUPABASE (INSTANCIA ÚNICA + POSTGRESQL + STORAGE)
+    // ===================================================================
     const CloudService = {
       getCredentials() {
         return {
@@ -1095,6 +1171,8 @@ jobs:
         localStorage.removeItem(SUPABASE_URL_KEY);
         localStorage.removeItem(SUPABASE_ANON_KEY);
         supabaseClient = null;
+        supabaseClientUrl = '';
+        supabaseClientKey = '';
         supabaseOnline = false;
         updateConnectionBadge(false);
       },
@@ -1109,9 +1187,13 @@ jobs:
         }
 
         try {
-          if (!supabaseClient || supabaseClient.supabaseUrl !== url) {
+          // Reutilizar cliente único para evitar advertencias de múltiples GoTrueClient
+          if (!supabaseClient || supabaseClientUrl !== url || supabaseClientKey !== key) {
             supabaseClient = window.supabase.createClient(url, key);
+            supabaseClientUrl = url;
+            supabaseClientKey = key;
           }
+
           const { error } = await supabaseClient.from('modules').select('id').limit(1);
           if (error) throw error;
 
@@ -1141,8 +1223,7 @@ jobs:
               id: String(m.id),
               title: m.title,
               category: m.category,
-              targetDate: m.target_date || '',
-              description: m.description || ''
+              targetDate: m.target_date || ''
             }));
           }
 
@@ -1152,8 +1233,9 @@ jobs:
               moduleId: String(t.module_id),
               title: t.title,
               description: t.description || '',
-              deadline: t.due_date,
-              priority: t.priority === 'Alta' || t.priority === 'high' ? 'high' : t.priority === 'Baja' || t.priority === 'low' ? 'low' : 'medium',
+              deadline: t.due_date || '',
+              priority: t.priority === 'Alta' || t.priority === 'high' ? 'high'
+                : t.priority === 'Baja' || t.priority === 'low' ? 'low' : 'medium',
               status: t.completed ? 'completed' : 'pending'
             }));
           }
@@ -1162,10 +1244,9 @@ jobs:
             state.deliverables = delivRes.data.map(d => ({
               id: String(d.id),
               taskId: d.task_id ? String(d.task_id) : '',
-              moduleId: '',
               title: d.title,
-              deadline: d.due_date,
-              fileName: d.file_name,
+              deadline: d.due_date || '',
+              fileName: d.file_name || 'Archivo',
               fileSize: 0,
               fileUrl: d.file_url || '',
               fileDataUrl: d.file_url || null,
@@ -1179,15 +1260,15 @@ jobs:
           if (logRes.data) {
             state.studyLogs = logRes.data.map(l => ({
               date: l.log_date,
-              hours: Number(l.hours),
-              note: l.summary
+              hours: Number(l.hours) || 0,
+              note: l.summary || ''
             }));
           }
 
           saveLocalStateOnly();
           renderAll();
         } catch (err) {
-          console.warn('Error al sincronizar desde Supabase:', err);
+          console.warn('Error sincronizando con Supabase:', err);
         }
       }
     };
@@ -1228,225 +1309,46 @@ jobs:
       }
     }
 
-    // =========================================================
-    // NAVEGACIÓN, TEMA Y CONMUTADOR LAPTOP / MÓVIL A17
-    // =========================================================
+    // ===================================================================
+    // NAVEGACIÓN ENTRE LAS 6 VISTAS, TEMA Y SIMULADOR A17 (360PX)
+    // ===================================================================
     function switchTab(tabName) {
       currentTab = tabName;
       const activeNavTab = (tabName === 'task-detail') ? previousTabBeforeDetail : tabName;
+      const allViews = ['dashboard', 'roadmap', 'calendar', 'deliverables', 'settings', 'task-detail'];
+      const navTabs = ['dashboard', 'roadmap', 'calendar', 'deliverables', 'settings'];
 
-      ['dashboard', 'roadmap', 'calendar', 'deliverables', 'settings', 'task-detail'].forEach(t => {
-        const view = document.getElementById(`view-${t}`);
-        if (view) view.classList.toggle('hidden', t !== tabName);
+      allViews.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.toggle('hidden', v !== tabName);
+      });
 
+      navTabs.forEach(t => {
         const deskBtn = document.getElementById(`nav-desk-${t}`);
         if (deskBtn) {
-          if (t === activeNavTab) {
-            deskBtn.className = 'w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium bg-zinc-100 dark:bg-zinc-800/90 text-zinc-900 dark:text-zinc-100';
-          } else {
-            deskBtn.className = 'w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors';
-          }
+          deskBtn.className = (t === activeNavTab)
+            ? 'w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium bg-zinc-100 dark:bg-zinc-800/90 text-zinc-900 dark:text-zinc-100'
+            : 'w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors';
         }
 
         const mobBtn = document.getElementById(`nav-mob-${t}`);
         if (mobBtn) {
-          if (t === activeNavTab) {
-            mobBtn.className = 'flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-semibold gap-1 min-w-0 text-zinc-900 dark:text-zinc-100';
-          } else {
-            mobBtn.className = 'flex flex-col items-center justify-center flex-1 py-1.5 text-[10px] font-medium gap-1 min-w-0 text-zinc-400 dark:text-zinc-500';
-          }
+          mobBtn.className = (t === activeNavTab)
+            ? 'flex flex-col items-center justify-center h-full py-1 text-[10px] font-semibold gap-1 min-w-0 text-zinc-900 dark:text-zinc-100'
+            : 'flex flex-col items-center justify-center h-full py-1 text-[10px] font-medium gap-1 min-w-0 text-zinc-400 dark:text-zinc-500';
         }
       });
 
       if (tabName === 'calendar') {
         renderCalendar();
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
 
-    function openTaskDetail(taskId) {
-      const task = state.tasks.find(t => String(t.id) === String(taskId));
-      if (!task) return;
-      if (currentTab !== 'task-detail') {
-        previousTabBeforeDetail = currentTab;
-      }
-      currentDetailTaskId = String(task.id);
-      renderTaskDetailView();
-      switchTab('task-detail');
-    }
-
-    function goBackFromTaskDetail() {
-      switchTab(previousTabBeforeDetail || 'roadmap');
-    }
-
-    function renderStructuredDescription(rawText) {
-      if (!rawText || !rawText.trim()) {
-        return `
-          <div class="p-5 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 text-center space-y-2">
-            <p class="text-xs font-medium text-zinc-700 dark:text-zinc-300">Sin descripción en la base de datos.</p>
-            <p class="text-[11px] text-zinc-400">Ejecuta el script UPDATE en Supabase o agrégala desde el editor de abajo.</p>
-          </div>
-        `;
-      }
-
-      const blocks = [];
-      const regex = /(LO QUE DEBES APRENDER:|LO QUE DEBES PROGRAMAR(?: \(EL CIERRE\))?:|FOCO DIPLOMADO BD:|OBJETIVO DIPLOMADO BD:|ENTREGABLE DE LA QUINCENA:|CRITERIO DE ENTREGA:)/gi;
-      const parts = rawText.split(regex);
-
-      if (parts.length === 1) {
-        return `
-          <div class="p-4 sm:p-5 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-2">
-            <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-400">Guía de la Tarea</span>
-            <div class="text-xs sm:text-sm text-zinc-700 dark:text-zinc-200 leading-relaxed whitespace-pre-line">${escapeHtml(rawText.trim())}</div>
-          </div>
-        `;
-      }
-
-      if (parts[0] && parts[0].trim()) {
-        blocks.push({ label: 'RESUMEN DE LA TAREA', content: parts[0].trim(), accent: 'zinc' });
-      }
-
-      for (let i = 1; i < parts.length; i += 2) {
-        const header = (parts[i] || '').replace(/:$/, '').trim().toUpperCase();
-        const body = (parts[i + 1] || '').trim();
-        if (!body) continue;
-        let accent = 'zinc';
-        if (header.includes('APRENDER')) accent = 'amber';
-        else if (header.includes('PROGRAMAR') || header.includes('ENTREGABLE')) accent = 'emerald';
-        blocks.push({ label: header, content: body, accent });
-      }
-
-      return blocks.map(b => {
-        const badgeStyle = b.accent === 'emerald'
-          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-          : b.accent === 'amber'
-          ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700';
-
-        return `
-          <div class="p-4 sm:p-5 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-2.5">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${badgeStyle}">${escapeHtml(b.label)}</span>
-            </div>
-            <div class="text-xs sm:text-sm text-zinc-700 dark:text-zinc-200 leading-relaxed whitespace-pre-line">${escapeHtml(b.content)}</div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderTaskDetailView() {
-      if (!currentDetailTaskId) return;
-      const task = state.tasks.find(t => String(t.id) === String(currentDetailTaskId));
-      if (!task) return;
-
-      const mod = state.modules.find(m => String(m.id) === String(task.moduleId));
-      const isDone = task.status === 'completed';
-      const diff = daysUntil(task.deadline);
-
-      document.getElementById('detail-task-module-badge').textContent = mod ? mod.category : 'TAREA';
-      document.getElementById('detail-task-module-title').textContent = mod ? mod.title : 'Plan Personal';
-      document.getElementById('detail-task-title').textContent = task.title;
-
-      const prioEl = document.getElementById('detail-task-priority-badge');
-      if (task.priority === 'high') {
-        prioEl.textContent = 'PRIORIDAD ALTA';
-        prioEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20';
-      } else if (task.priority === 'low') {
-        prioEl.textContent = 'PRIORIDAD BAJA';
-        prioEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-400';
+      const mainEl = document.getElementById('main-content');
+      if (mainEl && document.body.classList.contains('force-mobile-view')) {
+        mainEl.scrollTop = 0;
       } else {
-        prioEl.textContent = 'PRIORIDAD MEDIA';
-        prioEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-
-      const deadEl = document.getElementById('detail-task-deadline-badge');
-      if (diff < 0) {
-        deadEl.textContent = `Venció hace ${Math.abs(diff)}d (${formatShortDate(task.deadline)})`;
-        deadEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20';
-      } else if (diff === 0) {
-        deadEl.textContent = `Vence HOY (${formatShortDate(task.deadline)})`;
-        deadEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20';
-      } else {
-        deadEl.textContent = `Plazo: ${formatShortDate(task.deadline)} (en ${diff}d)`;
-        deadEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300';
-      }
-
-      const statusPill = document.getElementById('detail-task-status-pill');
-      const toggleBtn = document.getElementById('detail-btn-toggle');
-      if (isDone) {
-        statusPill.textContent = 'COMPLETADA ✓';
-        statusPill.className = 'text-[10px] font-mono px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 shrink-0';
-        toggleBtn.textContent = '↺ Reabrir tarea';
-      } else {
-        statusPill.textContent = 'PENDIENTE';
-        statusPill.className = 'text-[10px] font-mono px-2 py-0.5 rounded border bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 shrink-0';
-        toggleBtn.textContent = '✓ Marcar completada';
-      }
-
-      const fullDesc = (task.description || '').trim();
-      document.getElementById('detail-task-body').innerHTML = renderStructuredDescription(fullDesc);
-      document.getElementById('detail-task-desc-editor').value = fullDesc;
-
-      const linkedDelivs = state.deliverables.filter(d => String(d.taskId) === String(task.id));
-      const delivContainer = document.getElementById('detail-task-deliverables');
-      if (linkedDelivs.length === 0) {
-        delivContainer.innerHTML = `<p class="text-xs font-mono text-zinc-400 py-2">Aún no has subido archivos ni repositorios para esta tarea.</p>`;
-      } else {
-        delivContainer.innerHTML = linkedDelivs.map(d => {
-          const href = d.fileUrl || d.fileDataUrl || d.repoUrl || '';
-          return `
-            <div class="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200/70 dark:border-zinc-800 flex items-center justify-between gap-2">
-              <div class="min-w-0">
-                <p class="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate">${escapeHtml(d.title || d.fileName)}</p>
-                <p class="text-[11px] font-mono text-zinc-400 truncate">${escapeHtml(d.fileName)} • Subido: ${formatShortDate(d.submittedAt)}</p>
-              </div>
-              ${href ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-[11px] font-medium shrink-0">Abrir ↗</a>` : ''}
-            </div>
-          `;
-        }).join('');
-      }
-    }
-
-    async function toggleCurrentDetailTask() {
-      if (!currentDetailTaskId) return;
-      await cycleTaskStatus(currentDetailTaskId);
-      renderTaskDetailView();
-    }
-
-    function openDeliverableForCurrentDetailTask() {
-      if (!currentDetailTaskId) return;
-      openDeliverableModal(currentDetailTaskId);
-    }
-
-    async function saveTaskDescriptionFromDetail() {
-      if (!currentDetailTaskId) return;
-      const task = state.tasks.find(t => String(t.id) === String(currentDetailTaskId));
-      if (!task) return;
-
-      const newDesc = document.getElementById('detail-task-desc-editor').value.trim();
-      task.description = newDesc;
-
-      if (supabaseOnline && supabaseClient && !String(task.id).startsWith('t-')) {
-        const { error } = await supabaseClient
-          .from('tasks')
-          .update({ description: newDesc })
-          .eq('id', Number(task.id));
-
-        if (error) {
-          showToast(`Ejecuta primero el script SQL para habilitar la columna description: ${error.message}`, 'amber');
-          saveState();
-          renderTaskDetailView();
-          return;
-        }
-        await CloudService.pullStateFromServer();
-        renderTaskDetailView();
-        showToast('Descripción actualizada en Supabase PostgreSQL.', 'emerald');
-        return;
-      }
-
-      saveState();
-      renderTaskDetailView();
-      showToast('Descripción guardada.', 'emerald');
     }
 
     function setViewportMode(mode) {
@@ -1454,11 +1356,9 @@ jobs:
       ['auto', 'desktop', 'mobile'].forEach(m => {
         const btn = document.getElementById(`btn-view-${m}`);
         if (!btn) return;
-        if (m === mode) {
-          btn.className = 'px-2.5 py-1 rounded-md font-medium transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-2xs';
-        } else {
-          btn.className = 'px-2.5 py-1 rounded-md font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all';
-        }
+        btn.className = (m === mode)
+          ? 'px-2.5 py-1 rounded-md font-medium transition-all bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
+          : 'px-2.5 py-1 rounded-md font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all';
       });
       if (mode === 'mobile') document.body.classList.add('force-mobile-view');
       if (mode === 'desktop') document.body.classList.add('force-desktop-view');
@@ -1468,45 +1368,16 @@ jobs:
       document.documentElement.classList.toggle('dark');
     }
 
-    // =========================================================
-    // CÁLCULOS DE MÉTRICAS Y RENDERIZADO DE INTERFAZ
-    // =========================================================
-    function calculateStreak() {
-      if (!state.studyLogs || state.studyLogs.length === 0) return 0;
-      const uniqueDates = [...new Set(state.studyLogs.map(l => l.date))].sort().reverse();
-      const today = todayISO();
-      const yesterday = offsetDateISO(-1);
-
-      if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) return 0;
-
-      let streak = 1;
-      for (let i = 0; i < uniqueDates.length - 1; i++) {
-        const curr = new Date(uniqueDates[i] + 'T00:00:00');
-        const next = new Date(uniqueDates[i + 1] + 'T00:00:00');
-        const diffDays = Math.round((curr - next) / (1000 * 60 * 60 * 24));
-        if (diffDays === 1) {
-          streak++;
-        } else {
-          break;
-        }
-      }
-      return streak;
-    }
-
-    function daysUntil(dateStr) {
-      if (!dateStr) return 0;
-      const target = new Date(dateStr + 'T00:00:00');
-      const now = new Date(todayISO() + 'T00:00:00');
-      return Math.round((target - now) / (1000 * 60 * 60 * 24));
-    }
-
-    function formatShortDate(dateStr) {
-      if (!dateStr) return '--';
-      const parts = dateStr.split('-');
-      if (parts.length !== 3) return dateStr;
-      const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-      return `${parts[2]} ${months[parseInt(parts[1], 10) - 1] || parts[1]}`;
-    }
+    // ===================================================================
+    // UTILIDADES DE FORMATO Y CÁLCULO DE MÉTRICAS
+    // ===================================================================
+    const SPANISH_MONTHS = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    const SPANISH_WEEKDAYS = [
+      'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'
+    ];
 
     function escapeHtml(str) {
       if (!str) return '';
@@ -1517,6 +1388,60 @@ jobs:
         .replace(/"/g, '&quot;');
     }
 
+    function formatShortDate(dateStr) {
+      if (!dateStr) return '--';
+      const parts = dateStr.split('-');
+      if (parts.length !== 3) return dateStr;
+      const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      return `${parts[2]} ${months[parseInt(parts[1], 10) - 1] || parts[1]}`;
+    }
+
+    function formatLongSpanishDate(isoDate) {
+      if (!isoDate) return '--';
+      const parts = isoDate.split('-');
+      if (parts.length !== 3) return isoDate;
+      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      const weekday = SPANISH_WEEKDAYS[d.getDay()] || '';
+      const monthName = SPANISH_MONTHS[d.getMonth()] || '';
+      return `${weekday} ${d.getDate()} de ${monthName}`;
+    }
+
+    function daysUntil(dateStr) {
+      if (!dateStr) return 0;
+      const [ty, tm, td] = dateStr.split('-').map(Number);
+      const [ny, nm, nd] = todayISO().split('-').map(Number);
+      const target = new Date(ty, tm - 1, td);
+      const now = new Date(ny, nm - 1, nd);
+      return Math.round((target - now) / (1000 * 60 * 60 * 24));
+    }
+
+    function calculateStreak() {
+      if (!state.studyLogs || state.studyLogs.length === 0) return 0;
+      const uniqueDates = [...new Set(state.studyLogs.map(l => l.date))].sort().reverse();
+      const today = todayISO();
+      const yesterday = offsetDateISO(-1);
+
+      if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) return 0;
+
+      let streak = 1;
+      for (let i = 0; i < uniqueDates.length - 1; i++) {
+        const [cy, cm, cd] = uniqueDates[i].split('-').map(Number);
+        const [ny, nm, nd] = uniqueDates[i + 1].split('-').map(Number);
+        const curr = new Date(cy, cm - 1, cd);
+        const next = new Date(ny, nm - 1, nd);
+        const diffDays = Math.round((curr - next) / (1000 * 60 * 60 * 24));
+        if (diffDays === 1) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+      return streak;
+    }
+
+    // ===================================================================
+    // RENDERIZADO GENERAL DE TODAS LAS VISTAS
+    // ===================================================================
     function renderAll() {
       const now = new Date();
       const dateLabel = now.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: 'short' });
@@ -1526,7 +1451,7 @@ jobs:
       const mobGoal = document.getElementById('mobile-goal-heading');
       if (mobGoal) mobGoal.textContent = state.goal;
 
-      // Racha y estado de sesión hoy
+      // Racha y estado de estudio hoy
       const streak = calculateStreak();
       document.getElementById('sidebar-streak-val').textContent = `${streak} días`;
       document.getElementById('mobile-streak-pill').textContent = `Racha: ${streak}d`;
@@ -1542,7 +1467,7 @@ jobs:
         statusTag.className = 'text-amber-600 dark:text-amber-400';
       }
 
-      // Métricas de tareas y progreso
+      // Métricas de progreso
       const totalTasks = state.tasks.length;
       const completedTasks = state.tasks.filter(t => t.status === 'completed').length;
       const pct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -1552,26 +1477,25 @@ jobs:
       document.getElementById('stat-progress-bar').style.width = `${pct}%`;
       document.getElementById('badge-tasks-count').textContent = totalTasks;
 
-      // Horas totales
+      // Horas acumuladas
       const totalHours = state.studyLogs.reduce((acc, l) => acc + (Number(l.hours) || 0), 0);
       document.getElementById('stat-total-hours').textContent = `${totalHours.toFixed(1)} hrs acumuladas`;
 
-      // Entregables
+      // Métricas de entregables
       const totalDeliv = state.deliverables.length;
       const onTimeDeliv = state.deliverables.filter(d => d.onTime).length;
       document.getElementById('stat-deliverables-count').textContent = totalDeliv;
       document.getElementById('badge-deliv-count').textContent = totalDeliv;
       document.getElementById('stat-ontime-rate').textContent = totalDeliv > 0
-        ? `${onTimeDeliv}/${totalDeliv} a tiempo`
+        ? `${onTimeDeliv}/${totalDeliv} en plazo`
         : 'Sin entregas aún';
 
-      // Cargar ajustes de Telegram y recordatorio
       loadTelegramInputs();
-
       renderDashboardCards();
       renderRoadmap();
       renderCalendar();
       renderDeliverables();
+
       if (currentTab === 'task-detail' && currentDetailTaskId) {
         renderTaskDetailView();
       }
@@ -1580,7 +1504,7 @@ jobs:
     function renderDashboardCards() {
       const pendingTasks = state.tasks
         .filter(t => t.status !== 'completed')
-        .sort((a, b) => a.deadline.localeCompare(b.deadline));
+        .sort((a, b) => (a.deadline || '').localeCompare(b.deadline || ''));
 
       const nextCard = document.getElementById('next-deadline-card');
       const nextBadge = document.getElementById('next-deadline-badge');
@@ -1589,10 +1513,10 @@ jobs:
 
       if (pendingTasks.length === 0) {
         nextBadge.textContent = 'Al día';
-        nextBadge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500';
+        nextBadge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 shrink-0';
         nextCard.innerHTML = `
           <h3 class="text-sm font-medium text-zinc-900 dark:text-zinc-100">Sin entregas pendientes</h3>
-          <p class="text-xs text-zinc-500 dark:text-zinc-400">Asígnate una tarea en tu Plan de Estudio.</p>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400">Asígnate una tarea en tu Plan de Estudio o conecta Supabase.</p>
         `;
         nextModSpan.textContent = 'Plan sin pendientes';
         quickUploadBtn.onclick = () => openDeliverableModal();
@@ -1604,27 +1528,27 @@ jobs:
 
         if (diff < 0) {
           nextBadge.textContent = `Venció hace ${Math.abs(diff)}d`;
-          nextBadge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20';
+          nextBadge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 shrink-0';
         } else if (diff === 0) {
           nextBadge.textContent = 'Vence HOY';
-          nextBadge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20';
+          nextBadge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0';
         } else {
           nextBadge.textContent = `En ${diff}d (${formatShortDate(next.deadline)})`;
-          nextBadge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20';
+          nextBadge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0';
         }
 
         nextCard.innerHTML = `
           <button onclick="openTaskDetail('${next.id}')" class="text-left group w-full space-y-1">
             <h3 class="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100 group-hover:underline leading-snug">${escapeHtml(next.title)}</h3>
             ${previewDesc ? `<p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">${escapeHtml(previewDesc)}</p>` : ''}
-            <span class="inline-block text-[11px] font-mono text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 pt-0.5">Ver guía completa →</span>
+            <span class="inline-block text-[11px] font-mono text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 pt-0.5">Abrir guía completa ›</span>
           </button>
         `;
         nextModSpan.textContent = mod ? `${mod.category} • ${mod.title}` : 'Tarea asignada';
         quickUploadBtn.onclick = () => openDeliverableModal(next.id);
       }
 
-      // Lista de tareas próximas en Dashboard
+      // Lista de próximas tareas
       const upcomingEl = document.getElementById('dashboard-upcoming-list');
       if (pendingTasks.length === 0) {
         upcomingEl.innerHTML = `<p class="text-xs text-zinc-400 py-4 text-center font-mono">Sin tareas pendientes.</p>`;
@@ -1636,9 +1560,9 @@ jobs:
             <div class="py-2.5 flex items-center justify-between gap-2.5">
               <div class="flex items-center gap-2.5 min-w-0 flex-1">
                 <button onclick="cycleTaskStatus('${t.id}')" class="w-4 h-4 rounded border border-zinc-300 dark:border-zinc-700 hover:border-zinc-500 shrink-0 transition-colors" title="Completar"></button>
-                <button onclick="openTaskDetail('${t.id}')" class="text-left text-xs text-zinc-800 dark:text-zinc-200 hover:underline truncate flex-1" title="Ver descripción de la tarea">${escapeHtml(t.title)}</button>
+                <button onclick="openTaskDetail('${t.id}')" class="text-left text-xs text-zinc-800 dark:text-zinc-200 hover:underline truncate flex-1">${escapeHtml(t.title)}</button>
               </div>
-              <button onclick="openTaskDetail('${t.id}')" class="text-[11px] font-mono shrink-0 ${dateColor} hover:underline">${formatShortDate(t.deadline)} →</button>
+              <button onclick="openTaskDetail('${t.id}')" class="text-[11px] font-mono shrink-0 ${dateColor} hover:underline">${formatShortDate(t.deadline)} ›</button>
             </div>
           `;
         }).join('');
@@ -1647,7 +1571,7 @@ jobs:
       // Bitácora reciente
       const logsEl = document.getElementById('dashboard-logs-list');
       if (state.studyLogs.length === 0) {
-        logsEl.innerHTML = `<p class="text-xs text-zinc-400 py-4 text-center font-mono">Sin sesiones aún.</p>`;
+        logsEl.innerHTML = `<p class="text-xs text-zinc-400 py-4 text-center font-mono">Sin sesiones registradas.</p>`;
       } else {
         logsEl.innerHTML = state.studyLogs.slice(0, 4).map(l => `
           <div class="p-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-100 dark:border-zinc-800/80 space-y-1">
@@ -1661,16 +1585,17 @@ jobs:
       }
     }
 
+    // ===================================================================
+    // VISTA 2: PLAN DE ESTUDIO
+    // ===================================================================
     function setTaskFilter(filter) {
       currentTaskFilter = filter;
       ['all', 'pending', 'completed'].forEach(f => {
         const btn = document.getElementById(`filter-${f}`);
         if (!btn) return;
-        if (f === filter) {
-          btn.className = 'px-3 py-1.5 rounded-lg font-medium bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 shrink-0';
-        } else {
-          btn.className = 'px-3 py-1.5 rounded-lg font-medium text-zinc-500 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 shrink-0';
-        }
+        btn.className = (f === filter)
+          ? 'px-3 py-1.5 rounded-lg font-medium bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 shrink-0'
+          : 'px-3 py-1.5 rounded-lg font-medium text-zinc-500 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 shrink-0';
       });
       renderRoadmap();
     }
@@ -1681,7 +1606,7 @@ jobs:
         container.innerHTML = `
           <div class="p-6 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 text-center space-y-3">
             <p class="text-sm font-medium text-zinc-800 dark:text-zinc-200">Plan en blanco</p>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400">Crea tu primera sección para organizar tus tareas.</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400">Crea tu primera sección o conecta tu base de datos en Supabase.</p>
             <button onclick="openModuleModal()" class="px-4 py-2 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-xs font-medium">
               + Crear sección
             </button>
@@ -1705,6 +1630,7 @@ jobs:
                 <div class="flex flex-wrap items-center gap-1.5">
                   <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">${escapeHtml(mod.category)}</span>
                   <span class="text-[11px] font-mono text-zinc-400">${doneCount}/${allModTasks.length}</span>
+                  ${mod.targetDate ? `<span class="text-[10px] font-mono text-zinc-400">• ${formatShortDate(mod.targetDate)}</span>` : ''}
                 </div>
                 <h3 class="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug">${escapeHtml(mod.title)}</h3>
               </div>
@@ -1720,36 +1646,31 @@ jobs:
 
             <div class="divide-y divide-zinc-100 dark:divide-zinc-800/80">
               ${modTasks.length === 0 ? `
-                <p class="p-3.5 text-xs font-mono text-zinc-400">Sin tareas en esta sección.</p>
+                <p class="p-3.5 text-xs font-mono text-zinc-400">Sin tareas en esta vista.</p>
               ` : modTasks.map(t => {
                 const isDone = t.status === 'completed';
                 const prioBadge = t.priority === 'high'
                   ? '<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-500">ALTA</span>'
                   : '';
-                const previewDesc = (t.description || '').trim();
 
                 return `
                   <div class="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40 transition-colors">
                     <div class="flex items-start gap-2.5 min-w-0 flex-1">
-                      <button onclick="cycleTaskStatus('${t.id}')" class="mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${isDone ? 'bg-zinc-900 border-zinc-900 dark:bg-zinc-100 dark:border-zinc-100 text-white dark:text-zinc-950' : 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-500'}">
+                      <button onclick="cycleTaskStatus('${t.id}')" class="mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${isDone ? 'bg-zinc-900 border-zinc-900 dark:bg-zinc-100 dark:border-zinc-100 text-white dark:text-zinc-950' : 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-500'}" title="Cambiar estado">
                         ${isDone ? '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
                       </button>
                       <button onclick="openTaskDetail('${t.id}')" class="text-left min-w-0 flex-1 group">
                         <div class="flex flex-wrap items-center gap-1.5">
                           <span class="text-xs font-medium leading-snug group-hover:underline ${isDone ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}">${escapeHtml(t.title)}</span>
                           ${prioBadge}
+                          <span class="text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 text-xs leading-none">›</span>
                         </div>
-                        ${previewDesc ? `<p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-1">${escapeHtml(previewDesc)}</p>` : ''}
-                        <span class="inline-block text-[10px] font-mono text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200 mt-1">Ver guía detallada →</span>
                       </button>
                     </div>
 
                     <div class="flex items-center justify-between sm:justify-end gap-2 pl-6 sm:pl-0 shrink-0">
                       <span class="text-[11px] font-mono text-zinc-400">${formatShortDate(t.deadline)}</span>
                       <div class="flex items-center gap-1.5">
-                        <button onclick="openTaskDetail('${t.id}')" class="px-2 py-1 rounded border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">
-                          Guía
-                        </button>
                         <button onclick="openDeliverableModal('${t.id}')" class="px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">
                           ↑ Subir
                         </button>
@@ -1765,13 +1686,310 @@ jobs:
       }).join('');
     }
 
+    // ===================================================================
+    // VISTA 3: CALENDARIO INTERACTIVO Y CRONOGRAMA MENSUAL
+    // ===================================================================
+    function changeCalendarMonth(delta) {
+      calViewMonth += delta;
+      if (calViewMonth < 0) {
+        calViewMonth = 11;
+        calViewYear--;
+      } else if (calViewMonth > 11) {
+        calViewMonth = 0;
+        calViewYear++;
+      }
+
+      const today = todayISO();
+      const monthPrefix = `${calViewYear}-${String(calViewMonth + 1).padStart(2, '0')}`;
+      if (today.startsWith(monthPrefix)) {
+        calSelectedDate = today;
+      } else if (!calSelectedDate.startsWith(monthPrefix)) {
+        calSelectedDate = `${monthPrefix}-01`;
+      }
+      renderCalendar();
+    }
+
+    function goToCalendarToday() {
+      const now = new Date();
+      calViewYear = now.getFullYear();
+      calViewMonth = now.getMonth();
+      calSelectedDate = todayISO();
+      renderCalendar();
+    }
+
+    function selectCalendarDate(isoDate) {
+      calSelectedDate = isoDate;
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const titleEl = document.getElementById('cal-month-title');
+      const gridEl = document.getElementById('cal-days-grid');
+      if (!titleEl || !gridEl) return;
+
+      const today = todayISO();
+      const monthStr = String(calViewMonth + 1).padStart(2, '0');
+      const monthPrefix = `${calViewYear}-${monthStr}`;
+      titleEl.textContent = `${SPANISH_MONTHS[calViewMonth]} ${calViewYear}`;
+
+      // Indexar datos dinámicos de Supabase/estado por fecha YYYY-MM-DD
+      const tasksByDate = {};
+      state.tasks.forEach(t => {
+        if (!t.deadline) return;
+        if (!tasksByDate[t.deadline]) tasksByDate[t.deadline] = [];
+        tasksByDate[t.deadline].push(t);
+      });
+
+      const modulesByDate = {};
+      state.modules.forEach(m => {
+        if (!m.targetDate) return;
+        if (!modulesByDate[m.targetDate]) modulesByDate[m.targetDate] = [];
+        modulesByDate[m.targetDate].push(m);
+      });
+
+      const logsByDate = {};
+      state.studyLogs.forEach(l => {
+        if (!l.date) return;
+        if (!logsByDate[l.date]) logsByDate[l.date] = [];
+        logsByDate[l.date].push(l);
+      });
+
+      // Cuadrícula comenzando en Lunes (0 = Lun ... 6 = Dom)
+      const firstOfMonth = new Date(calViewYear, calViewMonth, 1);
+      const startOffset = (firstOfMonth.getDay() + 6) % 7;
+      const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
+
+      let cellsHtml = '';
+      for (let i = 0; i < startOffset; i++) {
+        cellsHtml += `<div class="min-h-[42px] sm:min-h-[48px]"></div>`;
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const iso = `${monthPrefix}-${String(day).padStart(2, '0')}`;
+        const isToday = iso === today;
+        const isSelected = iso === calSelectedDate;
+
+        const dayTasks = tasksByDate[iso] || [];
+        const dayMods = modulesByDate[iso] || [];
+        const dayLogs = logsByDate[iso] || [];
+
+        const hasOverdue = dayTasks.some(t => t.status !== 'completed' && t.deadline < today);
+        const hasPending = dayTasks.some(t => t.status !== 'completed' && t.deadline >= today);
+        const hasCompleted = dayTasks.some(t => t.status === 'completed');
+        const hasModuleTarget = dayMods.length > 0;
+        const hasStudyLog = dayLogs.length > 0;
+
+        const dots = [];
+        if (hasOverdue) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>');
+        if (hasPending) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>');
+        if (hasCompleted) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>');
+        if (hasModuleTarget) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>');
+        if (hasStudyLog) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-violet-400"></span>');
+
+        let cellClass = 'min-h-[42px] sm:min-h-[48px] rounded-lg flex flex-col items-center justify-center gap-1 p-1 transition-all ';
+        if (isSelected) {
+          cellClass += 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-semibold';
+        } else if (isToday) {
+          cellClass += 'bg-zinc-100/80 dark:bg-zinc-800/80 text-zinc-900 dark:text-zinc-100 font-semibold ring-1 ring-zinc-400 dark:ring-zinc-500';
+        } else {
+          cellClass += 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60';
+        }
+
+        cellsHtml += `
+          <button onclick="selectCalendarDate('${iso}')" class="${cellClass}" aria-label="${iso}">
+            <span class="text-xs font-mono leading-none">${day}</span>
+            <span class="flex items-center justify-center gap-0.5 h-1.5">${dots.slice(0, 4).join('')}</span>
+          </button>
+        `;
+      }
+
+      gridEl.innerHTML = cellsHtml;
+      renderSelectedDayDetail(
+        tasksByDate[calSelectedDate] || [],
+        modulesByDate[calSelectedDate] || [],
+        logsByDate[calSelectedDate] || []
+      );
+      renderMonthlyAgenda(monthPrefix);
+    }
+
+    function renderSelectedDayDetail(dayTasks, dayMods, dayLogs) {
+      const labelEl = document.getElementById('cal-selected-date-label');
+      const contentEl = document.getElementById('cal-selected-day-content');
+      if (!labelEl || !contentEl) return;
+
+      const today = todayISO();
+      labelEl.textContent = formatLongSpanishDate(calSelectedDate);
+
+      if (dayTasks.length === 0 && dayMods.length === 0 && dayLogs.length === 0) {
+        contentEl.innerHTML = `
+          <div class="py-5 text-center space-y-1">
+            <p class="text-xs font-mono text-zinc-400">Día sin plazos ni registros.</p>
+            <p class="text-[11px] text-zinc-500">Toca "+ Tarea" para programar una entrega en esta fecha.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+
+      if (dayMods.length > 0) {
+        html += `<div class="space-y-1.5">`;
+        dayMods.forEach(m => {
+          html += `
+            <div class="p-2.5 rounded-lg border border-sky-400/25 bg-sky-400/10 flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <span class="text-[10px] font-mono uppercase text-sky-600 dark:text-sky-400">Meta de Sección • ${escapeHtml(m.category)}</span>
+                <p class="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate">${escapeHtml(m.title)}</p>
+              </div>
+              <button onclick="switchTab('roadmap')" class="text-[11px] font-mono text-sky-600 dark:text-sky-400 hover:underline shrink-0">Ver ›</button>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      if (dayTasks.length > 0) {
+        html += `<div class="space-y-1.5">`;
+        dayTasks.forEach(t => {
+          const isDone = t.status === 'completed';
+          const isOverdue = !isDone && t.deadline < today;
+          const mod = state.modules.find(m => m.id === t.moduleId);
+          const badge = isDone
+            ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500">LISTA</span>'
+            : isOverdue
+            ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-500">VENCIDA</span>'
+            : t.priority === 'high'
+            ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500">ALTA</span>'
+            : '';
+
+          html += `
+            <div class="p-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-100 dark:border-zinc-800/80 flex items-start gap-2.5">
+              <button onclick="cycleTaskStatus('${t.id}')" class="mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${isDone ? 'bg-zinc-900 border-zinc-900 dark:bg-zinc-100 dark:border-zinc-100 text-white dark:text-zinc-950' : 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-500'}" title="Completar">
+                ${isDone ? '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+              </button>
+              <button onclick="openTaskDetail('${t.id}')" class="text-left min-w-0 flex-1 group space-y-0.5">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="text-xs font-medium leading-snug group-hover:underline ${isDone ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}">${escapeHtml(t.title)}</span>
+                  ${badge}
+                </div>
+                <p class="text-[10px] font-mono text-zinc-400 truncate">${mod ? escapeHtml(mod.category) : 'Tarea'} • Ver detalle ›</p>
+              </button>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      if (dayLogs.length > 0) {
+        html += `<div class="space-y-1.5 pt-1">`;
+        dayLogs.forEach(l => {
+          html += `
+            <div class="p-2.5 rounded-lg border border-violet-400/25 bg-violet-400/10 space-y-1">
+              <div class="flex items-center justify-between text-[10px] font-mono">
+                <span class="text-violet-600 dark:text-violet-300 uppercase">Sesión Registrada</span>
+                <span class="text-emerald-600 dark:text-emerald-400 font-semibold">+${Number(l.hours).toFixed(1)}h</span>
+              </div>
+              <p class="text-xs text-zinc-700 dark:text-zinc-300 leading-snug">${escapeHtml(l.note)}</p>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      contentEl.innerHTML = html;
+    }
+
+    function renderMonthlyAgenda(monthPrefix) {
+      const listEl = document.getElementById('cal-month-agenda-list');
+      const countEl = document.getElementById('cal-month-agenda-count');
+      if (!listEl || !countEl) return;
+
+      const today = todayISO();
+      const events = [];
+
+      state.tasks.forEach(t => {
+        if (t.deadline && t.deadline.startsWith(monthPrefix)) {
+          const mod = state.modules.find(m => m.id === t.moduleId);
+          events.push({
+            type: 'task',
+            date: t.deadline,
+            id: t.id,
+            title: t.title,
+            category: mod ? mod.category : 'TAREA',
+            completed: t.status === 'completed'
+          });
+        }
+      });
+
+      state.modules.forEach(m => {
+        if (m.targetDate && m.targetDate.startsWith(monthPrefix)) {
+          events.push({
+            type: 'module',
+            date: m.targetDate,
+            id: m.id,
+            title: `Meta: ${m.title}`,
+            category: m.category
+          });
+        }
+      });
+
+      events.sort((a, b) => a.date.localeCompare(b.date) || (a.type === 'module' ? 1 : -1));
+      countEl.textContent = `${events.length} ${events.length === 1 ? 'evento' : 'eventos'}`;
+
+      if (events.length === 0) {
+        listEl.innerHTML = `<p class="text-xs font-mono text-zinc-400 py-4 text-center">No hay tareas ni metas programadas para este mes.</p>`;
+        return;
+      }
+
+      listEl.innerHTML = events.map(ev => {
+        if (ev.type === 'module') {
+          return `
+            <button onclick="selectCalendarDate('${ev.date}')" class="w-full py-2.5 flex items-center justify-between gap-2.5 text-left hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition-colors">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-2 h-2 rounded-full bg-sky-400 shrink-0"></span>
+                <div class="min-w-0">
+                  <p class="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate">${escapeHtml(ev.title)}</p>
+                  <span class="text-[10px] font-mono text-sky-600 dark:text-sky-400">${escapeHtml(ev.category)}</span>
+                </div>
+              </div>
+              <span class="text-[11px] font-mono text-zinc-400 shrink-0">${formatShortDate(ev.date)}</span>
+            </button>
+          `;
+        }
+
+        const isOverdue = !ev.completed && ev.date < today;
+        const dotClass = ev.completed ? 'bg-emerald-500' : isOverdue ? 'bg-red-500' : 'bg-amber-500';
+        const dateClass = ev.completed
+          ? 'text-emerald-600 dark:text-emerald-400'
+          : isOverdue
+          ? 'text-red-500'
+          : 'text-zinc-400';
+
+        return `
+          <button onclick="openTaskDetail('${ev.id}')" class="w-full py-2.5 flex items-center justify-between gap-2.5 text-left hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition-colors group">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-2 h-2 rounded-full ${dotClass} shrink-0"></span>
+              <div class="min-w-0">
+                <p class="text-xs font-medium truncate group-hover:underline ${ev.completed ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}">${escapeHtml(ev.title)}</p>
+                <span class="text-[10px] font-mono text-zinc-400">${escapeHtml(ev.category)}</span>
+              </div>
+            </div>
+            <span class="text-[11px] font-mono shrink-0 ${dateClass}">${formatShortDate(ev.date)} ›</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // ===================================================================
+    // VISTA 4: ENTREGABLES
+    // ===================================================================
     function renderDeliverables() {
       const container = document.getElementById('deliverables-list');
       if (state.deliverables.length === 0) {
         container.innerHTML = `
           <div class="md:col-span-2 p-6 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 text-center space-y-3">
             <p class="text-sm font-medium text-zinc-800 dark:text-zinc-200">Sin entregables subidos</p>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400">Adjunta tus archivos o proyectos aquí para evaluar tus plazos.</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400">Adjunta tus archivos o repositorios para evaluar tus plazos.</p>
             <button onclick="openDeliverableModal()" class="px-4 py-2 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-xs font-medium">
               ↑ Subir entregable
             </button>
@@ -1830,329 +2048,240 @@ jobs:
       }).join('');
     }
 
-    // =========================================================
-    // CALENDARIO INTERACTIVO MENSUAL Y CRONOGRAMA
-    // =========================================================
-    const SPANISH_MONTHS = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-    ];
-    const SPANISH_WEEKDAYS = [
-      'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'
-    ];
-
-    function formatLongSpanishDate(isoDate) {
-      if (!isoDate) return '--';
-      const parts = isoDate.split('-');
-      if (parts.length !== 3) return isoDate;
-      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-      const weekday = SPANISH_WEEKDAYS[d.getDay()] || '';
-      const monthName = SPANISH_MONTHS[d.getMonth()] || '';
-      return `${weekday} ${d.getDate()} de ${monthName}`;
-    }
-
-    function changeCalendarMonth(delta) {
-      calViewMonth += delta;
-      if (calViewMonth < 0) {
-        calViewMonth = 11;
-        calViewYear--;
-      } else if (calViewMonth > 11) {
-        calViewMonth = 0;
-        calViewYear++;
+    // ===================================================================
+    // VISTA 6: DETALLE DE TAREA (LECTURA/EDICIÓN DE tasks.description)
+    // ===================================================================
+    function openTaskDetail(taskId) {
+      const task = state.tasks.find(t => String(t.id) === String(taskId));
+      if (!task) return;
+      if (currentTab !== 'task-detail') {
+        previousTabBeforeDetail = currentTab;
       }
-
-      const today = todayISO();
-      const monthPrefix = `${calViewYear}-${String(calViewMonth + 1).padStart(2, '0')}`;
-      if (today.startsWith(monthPrefix)) {
-        calSelectedDate = today;
-      } else if (!calSelectedDate.startsWith(monthPrefix)) {
-        calSelectedDate = `${monthPrefix}-01`;
-      }
-      renderCalendar();
+      currentDetailTaskId = String(task.id);
+      toggleDescriptionEditor(false);
+      renderTaskDetailView();
+      switchTab('task-detail');
     }
 
-    function goToCalendarToday() {
-      const now = new Date();
-      calViewYear = now.getFullYear();
-      calViewMonth = now.getMonth();
-      calSelectedDate = todayISO();
-      renderCalendar();
+    function goBackFromTaskDetail() {
+      switchTab(previousTabBeforeDetail || 'roadmap');
     }
 
-    function selectCalendarDate(isoDate) {
-      calSelectedDate = isoDate;
-      renderCalendar();
+    function toggleDescriptionEditor(forceState = null) {
+      const box = document.getElementById('detail-desc-editor-box');
+      const btn = document.getElementById('btn-toggle-desc-editor');
+      if (!box || !btn) return;
+      const shouldOpen = forceState !== null ? forceState : box.classList.contains('hidden');
+      box.classList.toggle('hidden', !shouldOpen);
+      btn.textContent = shouldOpen ? 'Cerrar editor' : 'Editar descripción';
     }
 
-    function renderCalendar() {
-      const titleEl = document.getElementById('cal-month-title');
-      const gridEl = document.getElementById('cal-days-grid');
-      if (!titleEl || !gridEl) return;
-
-      const today = todayISO();
-      const monthStr = String(calViewMonth + 1).padStart(2, '0');
-      const monthPrefix = `${calViewYear}-${monthStr}`;
-      titleEl.textContent = `${SPANISH_MONTHS[calViewMonth]} ${calViewYear}`;
-
-      // Indexar eventos por fecha YYYY-MM-DD leyendo dinámicamente desde state (Supabase / local)
-      const tasksByDate = {};
-      state.tasks.forEach(t => {
-        if (!t.deadline) return;
-        if (!tasksByDate[t.deadline]) tasksByDate[t.deadline] = [];
-        tasksByDate[t.deadline].push(t);
-      });
-
-      const modulesByDate = {};
-      state.modules.forEach(m => {
-        if (!m.targetDate) return;
-        if (!modulesByDate[m.targetDate]) modulesByDate[m.targetDate] = [];
-        modulesByDate[m.targetDate].push(m);
-      });
-
-      const logsByDate = {};
-      state.studyLogs.forEach(l => {
-        if (!l.date) return;
-        if (!logsByDate[l.date]) logsByDate[l.date] = [];
-        logsByDate[l.date].push(l);
-      });
-
-      // Primer día del mes (ajustado para semana que inicia en Lunes: 0 = Lun ... 6 = Dom)
-      const firstOfMonth = new Date(calViewYear, calViewMonth, 1);
-      const startOffset = (firstOfMonth.getDay() + 6) % 7;
-      const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
-
-      let cellsHtml = '';
-      for (let i = 0; i < startOffset; i++) {
-        cellsHtml += `<div class="min-h-[44px] sm:min-h-[52px]"></div>`;
-      }
-
-      for (let day = 1; day <= daysInMonth; day++) {
-        const iso = `${monthPrefix}-${String(day).padStart(2, '0')}`;
-        const isToday = iso === today;
-        const isSelected = iso === calSelectedDate;
-
-        const dayTasks = tasksByDate[iso] || [];
-        const dayMods = modulesByDate[iso] || [];
-        const dayLogs = logsByDate[iso] || [];
-
-        const hasOverdue = dayTasks.some(t => t.status !== 'completed' && t.deadline < today);
-        const hasHighPending = dayTasks.some(t => t.status !== 'completed' && t.priority === 'high' && t.deadline >= today);
-        const hasNormalPending = dayTasks.some(t => t.status !== 'completed' && t.priority !== 'high' && t.deadline >= today);
-        const hasDoneOrLog = dayTasks.some(t => t.status === 'completed') || dayLogs.length > 0;
-        const hasModuleTarget = dayMods.length > 0;
-
-        const dots = [];
-        if (hasOverdue) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>');
-        if (hasHighPending) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>');
-        if (hasNormalPending) {
-          const neutralDot = isSelected ? 'bg-zinc-300 dark:bg-zinc-600' : 'bg-zinc-400 dark:bg-zinc-300';
-          dots.push(`<span class="w-1.5 h-1.5 rounded-full ${neutralDot}"></span>`);
-        }
-        if (hasDoneOrLog) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>');
-        if (hasModuleTarget) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>');
-
-        let cellClass = 'min-h-[44px] sm:min-h-[52px] rounded-lg flex flex-col items-center justify-center gap-1 p-1 transition-all ';
-        if (isSelected) {
-          cellClass += 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-semibold';
-        } else if (isToday) {
-          cellClass += 'bg-zinc-100/80 dark:bg-zinc-800/70 text-zinc-900 dark:text-zinc-100 font-semibold ring-1 ring-zinc-400 dark:ring-zinc-500';
-        } else {
-          cellClass += 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60';
-        }
-
-        cellsHtml += `
-          <button onclick="selectCalendarDate('${iso}')" class="${cellClass}" aria-label="${iso}">
-            <span class="text-xs font-mono leading-none">${day}</span>
-            <span class="flex items-center justify-center gap-0.5 h-1.5">${dots.join('')}</span>
-          </button>
-        `;
-      }
-
-      gridEl.innerHTML = cellsHtml;
-      renderSelectedDayDetail(tasksByDate[calSelectedDate] || [], modulesByDate[calSelectedDate] || [], logsByDate[calSelectedDate] || []);
-      renderMonthlyAgenda(monthPrefix);
-    }
-
-    function renderSelectedDayDetail(dayTasks, dayMods, dayLogs) {
-      const labelEl = document.getElementById('cal-selected-date-label');
-      const contentEl = document.getElementById('cal-selected-day-content');
-      if (!labelEl || !contentEl) return;
-
-      const today = todayISO();
-      labelEl.textContent = formatLongSpanishDate(calSelectedDate);
-
-      if (dayTasks.length === 0 && dayMods.length === 0 && dayLogs.length === 0) {
-        contentEl.innerHTML = `
-          <div class="py-6 text-center space-y-1.5">
-            <p class="text-xs font-mono text-zinc-400">Día libre sin plazos ni registros.</p>
-            <p class="text-[11px] text-zinc-500">Toca "+ Tarea" para programar algo en esta fecha.</p>
+    function renderStructuredDescription(rawText) {
+      if (!rawText || !rawText.trim()) {
+        return `
+          <div class="p-5 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 text-center space-y-1.5">
+            <p class="text-xs font-medium text-zinc-700 dark:text-zinc-300">Esta tarea aún no tiene descripción.</p>
+            <p class="text-[11px] text-zinc-400">Usa "Editar descripción" para agregar apuntes o ejecuta tu script SQL en Supabase.</p>
           </div>
         `;
-        return;
       }
 
-      let html = '';
+      const blocks = [];
+      const regex = /(LO QUE DEBES APRENDER:|LO QUE DEBES PROGRAMAR(?: \(EL CIERRE\))?:|FOCO DIPLOMADO BD:)/gi;
+      const parts = rawText.split(regex);
 
-      if (dayMods.length > 0) {
-        html += `<div class="space-y-1.5">`;
-        dayMods.forEach(m => {
-          html += `
-            <div class="p-2.5 rounded-lg border border-sky-400/25 bg-sky-400/10 flex items-center justify-between gap-2">
-              <div class="min-w-0">
-                <span class="text-[10px] font-mono uppercase text-sky-600 dark:text-sky-400">Meta de Sección • ${escapeHtml(m.category)}</span>
-                <p class="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate">${escapeHtml(m.title)}</p>
-              </div>
-              <button onclick="switchTab('roadmap')" class="text-[11px] font-mono text-sky-600 dark:text-sky-400 hover:underline shrink-0">Ver →</button>
-            </div>
-          `;
-        });
-        html += `</div>`;
+      if (parts.length === 1) {
+        return `
+          <div class="p-4 sm:p-5 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114]">
+            <div class="text-xs sm:text-sm text-zinc-700 dark:text-zinc-200 leading-relaxed whitespace-pre-line">${escapeHtml(rawText.trim())}</div>
+          </div>
+        `;
       }
 
-      if (dayTasks.length > 0) {
-        html += `<div class="space-y-1.5">`;
-        dayTasks.forEach(t => {
-          const isDone = t.status === 'completed';
-          const isOverdue = !isDone && t.deadline < today;
-          const mod = state.modules.find(m => m.id === t.moduleId);
-          const badge = isDone
-            ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500">LISTA</span>'
-            : isOverdue
-            ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-500">VENCIDA</span>'
-            : t.priority === 'high'
-            ? '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500">ALTA</span>'
-            : '';
-
-          html += `
-            <div class="p-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-100 dark:border-zinc-800/80 flex items-start gap-2.5">
-              <button onclick="cycleTaskStatus('${t.id}')" class="mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${isDone ? 'bg-zinc-900 border-zinc-900 dark:bg-zinc-100 dark:border-zinc-100 text-white dark:text-zinc-950' : 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-500'}" title="Completar">
-                ${isDone ? '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
-              </button>
-              <button onclick="openTaskDetail('${t.id}')" class="text-left min-w-0 flex-1 group space-y-0.5">
-                <div class="flex flex-wrap items-center gap-1.5">
-                  <span class="text-xs font-medium leading-snug group-hover:underline ${isDone ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}">${escapeHtml(t.title)}</span>
-                  ${badge}
-                </div>
-                <p class="text-[10px] font-mono text-zinc-400 truncate">${mod ? escapeHtml(mod.category) : 'Tarea'} • Ver guía →</p>
-              </button>
-            </div>
-          `;
-        });
-        html += `</div>`;
+      if (parts[0] && parts[0].trim()) {
+        blocks.push({ label: 'RESUMEN', content: parts[0].trim(), accent: 'zinc' });
       }
 
-      if (dayLogs.length > 0) {
-        html += `<div class="space-y-1.5 pt-1">`;
-        dayLogs.forEach(l => {
-          html += `
-            <div class="p-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 space-y-1">
-              <div class="flex items-center justify-between text-[10px] font-mono">
-                <span class="text-emerald-600 dark:text-emerald-400 uppercase">Sesión Registrada</span>
-                <span class="text-emerald-600 dark:text-emerald-400 font-semibold">+${Number(l.hours).toFixed(1)}h</span>
-              </div>
-              <p class="text-xs text-zinc-700 dark:text-zinc-300 leading-snug">${escapeHtml(l.note)}</p>
-            </div>
-          `;
-        });
-        html += `</div>`;
+      for (let i = 1; i < parts.length; i += 2) {
+        const header = (parts[i] || '').replace(/:$/, '').trim().toUpperCase();
+        const body = (parts[i + 1] || '').trim();
+        if (!body) continue;
+
+        let accent = 'zinc';
+        if (header.includes('APRENDER')) accent = 'amber';
+        else if (header.includes('PROGRAMAR')) accent = 'emerald';
+        else if (header.includes('DIPLOMADO')) accent = 'sky';
+
+        blocks.push({ label: header, content: body, accent });
       }
 
-      contentEl.innerHTML = html;
-    }
-
-    function renderMonthlyAgenda(monthPrefix) {
-      const listEl = document.getElementById('cal-month-agenda-list');
-      const countEl = document.getElementById('cal-month-agenda-count');
-      if (!listEl || !countEl) return;
-
-      const today = todayISO();
-      const events = [];
-
-      state.tasks.forEach(t => {
-        if (t.deadline && t.deadline.startsWith(monthPrefix)) {
-          const mod = state.modules.find(m => m.id === t.moduleId);
-          events.push({
-            type: 'task',
-            date: t.deadline,
-            id: t.id,
-            title: t.title,
-            category: mod ? mod.category : 'TAREA',
-            priority: t.priority,
-            completed: t.status === 'completed'
-          });
-        }
-      });
-
-      state.modules.forEach(m => {
-        if (m.targetDate && m.targetDate.startsWith(monthPrefix)) {
-          events.push({
-            type: 'module',
-            date: m.targetDate,
-            id: m.id,
-            title: `Meta: ${m.title}`,
-            category: m.category
-          });
-        }
-      });
-
-      events.sort((a, b) => a.date.localeCompare(b.date) || (a.type === 'module' ? 1 : -1));
-      countEl.textContent = `${events.length} ${events.length === 1 ? 'evento' : 'eventos'}`;
-
-      if (events.length === 0) {
-        listEl.innerHTML = `<p class="text-xs font-mono text-zinc-400 py-4 text-center">No hay tareas ni metas programadas para este mes.</p>`;
-        return;
-      }
-
-      listEl.innerHTML = events.map(ev => {
-        if (ev.type === 'module') {
-          return `
-            <button onclick="selectCalendarDate('${ev.date}')" class="w-full py-2.5 flex items-center justify-between gap-2.5 text-left hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition-colors">
-              <div class="flex items-center gap-2.5 min-w-0">
-                <span class="w-2 h-2 rounded-full bg-sky-400 shrink-0"></span>
-                <div class="min-w-0">
-                  <p class="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate">${escapeHtml(ev.title)}</p>
-                  <span class="text-[10px] font-mono text-sky-600 dark:text-sky-400">${escapeHtml(ev.category)}</span>
-                </div>
-              </div>
-              <span class="text-[11px] font-mono text-zinc-400 shrink-0">${formatShortDate(ev.date)}</span>
-            </button>
-          `;
-        }
-
-        const isOverdue = !ev.completed && ev.date < today;
-        const dotClass = ev.completed
-          ? 'bg-emerald-500'
-          : isOverdue
-          ? 'bg-red-500'
-          : ev.priority === 'high'
-          ? 'bg-amber-500'
-          : 'bg-zinc-400 dark:bg-zinc-300';
-        const dateClass = ev.completed
-          ? 'text-emerald-600 dark:text-emerald-400'
-          : isOverdue
-          ? 'text-red-500'
-          : 'text-zinc-400';
+      return blocks.map(b => {
+        const badgeStyle = b.accent === 'emerald'
+          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+          : b.accent === 'amber'
+          ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+          : b.accent === 'sky'
+          ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20'
+          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700';
 
         return `
-          <button onclick="openTaskDetail('${ev.id}')" class="w-full py-2.5 flex items-center justify-between gap-2.5 text-left hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition-colors group">
-            <div class="flex items-center gap-2.5 min-w-0">
-              <span class="w-2 h-2 rounded-full ${dotClass} shrink-0"></span>
-              <div class="min-w-0">
-                <p class="text-xs font-medium truncate group-hover:underline ${ev.completed ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}">${escapeHtml(ev.title)}</p>
-                <span class="text-[10px] font-mono text-zinc-400">${escapeHtml(ev.category)}</span>
-              </div>
-            </div>
-            <span class="text-[11px] font-mono shrink-0 ${dateClass}">${formatShortDate(ev.date)} →</span>
-          </button>
+          <div class="p-4 sm:p-5 rounded-xl border border-zinc-200 dark:border-zinc-800/90 bg-white dark:bg-[#111114] space-y-2.5">
+            <span class="inline-block text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${badgeStyle}">${escapeHtml(b.label)}</span>
+            <div class="text-xs sm:text-sm text-zinc-700 dark:text-zinc-200 leading-relaxed whitespace-pre-line">${escapeHtml(b.content)}</div>
+          </div>
         `;
       }).join('');
+    }
+
+    function renderTaskDetailView() {
+      if (!currentDetailTaskId) return;
+      const task = state.tasks.find(t => String(t.id) === String(currentDetailTaskId));
+      if (!task) return;
+
+      const mod = state.modules.find(m => String(m.id) === String(task.moduleId));
+      const isDone = task.status === 'completed';
+      const diff = daysUntil(task.deadline);
+
+      document.getElementById('detail-task-module-badge').textContent = mod ? mod.category : 'TAREA';
+      document.getElementById('detail-task-module-title').textContent = mod ? mod.title : 'Plan Personal';
+      document.getElementById('detail-task-title').textContent = task.title;
+
+      const prioEl = document.getElementById('detail-task-priority-badge');
+      if (task.priority === 'high') {
+        prioEl.textContent = 'ALTA';
+        prioEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20';
+      } else if (task.priority === 'low') {
+        prioEl.textContent = 'BAJA';
+        prioEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-400';
+      } else {
+        prioEl.textContent = 'MEDIA';
+        prioEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300';
+      }
+
+      const deadEl = document.getElementById('detail-task-deadline-badge');
+      if (!task.deadline) {
+        deadEl.textContent = 'Sin plazo';
+        deadEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500';
+      } else if (diff < 0) {
+        deadEl.textContent = `Venció hace ${Math.abs(diff)}d (${formatShortDate(task.deadline)})`;
+        deadEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20';
+      } else if (diff === 0) {
+        deadEl.textContent = `Vence HOY (${formatShortDate(task.deadline)})`;
+        deadEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20';
+      } else {
+        deadEl.textContent = `${formatShortDate(task.deadline)} (en ${diff}d)`;
+        deadEl.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300';
+      }
+
+      const statusPill = document.getElementById('detail-task-status-pill');
+      const toggleBtn = document.getElementById('detail-btn-toggle');
+      if (isDone) {
+        statusPill.textContent = 'COMPLETADA ✓';
+        statusPill.className = 'text-[10px] font-mono px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 shrink-0';
+        toggleBtn.textContent = 'Completada ✓';
+      } else {
+        statusPill.textContent = 'PENDIENTE';
+        statusPill.className = 'text-[10px] font-mono px-2 py-0.5 rounded border bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 shrink-0';
+        toggleBtn.textContent = 'Marcar completada';
+      }
+
+      const fullDesc = (task.description || '').trim();
+      document.getElementById('detail-task-body').innerHTML = renderStructuredDescription(fullDesc);
+      document.getElementById('detail-task-desc-editor').value = fullDesc;
+
+      // Entregables vinculados
+      const linkedDelivs = state.deliverables.filter(d => String(d.taskId) === String(task.id));
+      const delivContainer = document.getElementById('detail-task-deliverables');
+      if (linkedDelivs.length === 0) {
+        delivContainer.innerHTML = `<p class="text-xs font-mono text-zinc-400 py-2">Sin entregables vinculados a esta tarea aún.</p>`;
+      } else {
+        delivContainer.innerHTML = linkedDelivs.map(d => {
+          const href = d.fileUrl || d.fileDataUrl || d.repoUrl || '';
+          return `
+            <div class="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200/70 dark:border-zinc-800 flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <p class="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate">${escapeHtml(d.title || d.fileName)}</p>
+                <p class="text-[11px] font-mono text-zinc-400 truncate">${escapeHtml(d.fileName)} • ${formatShortDate(d.submittedAt)}</p>
+              </div>
+              ${href ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-[11px] font-medium shrink-0">Abrir ↗</a>` : ''}
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    async function toggleCurrentDetailTask() {
+      if (!currentDetailTaskId) return;
+      await cycleTaskStatus(currentDetailTaskId);
+      renderTaskDetailView();
+    }
+
+    function openDeliverableForCurrentDetailTask() {
+      if (!currentDetailTaskId) return;
+      openDeliverableModal(currentDetailTaskId);
+    }
+
+    async function saveTaskDescriptionFromDetail() {
+      if (!currentDetailTaskId) return;
+      const task = state.tasks.find(t => String(t.id) === String(currentDetailTaskId));
+      if (!task) return;
+
+      const newDesc = document.getElementById('detail-task-desc-editor').value.trim();
+      task.description = newDesc;
+
+      if (supabaseOnline && supabaseClient && !String(task.id).startsWith('t-')) {
+        const { error } = await supabaseClient
+          .from('tasks')
+          .update({ description: newDesc })
+          .eq('id', Number(task.id));
+
+        if (error) {
+          showToast(`Error al guardar en Supabase: ${error.message}`, 'amber');
+          saveState();
+          renderTaskDetailView();
+          return;
+        }
+        await CloudService.pullStateFromServer();
+        toggleDescriptionEditor(false);
+        renderTaskDetailView();
+        showToast('Descripción guardada en Supabase.', 'emerald');
+        return;
+      }
+
+      saveState();
+      toggleDescriptionEditor(false);
+      renderTaskDetailView();
+      showToast('Descripción guardada localmente.', 'emerald');
+    }
+
+    // ===================================================================
+    // OPERACIONES CRUD (MÓDULOS, TAREAS, ENTREGABLES, BITÁCORA)
+    // ===================================================================
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function openModuleModal() {
+      document.getElementById('module-title').value = '';
+      document.getElementById('module-category').value = '';
+      document.getElementById('module-target-date').value = todayISO();
+      openModal('modal-module');
     }
 
     async function saveModule() {
       const title = document.getElementById('module-title').value.trim();
       const category = document.getElementById('module-category').value.trim().toUpperCase() || 'MODULO';
       const targetDate = document.getElementById('module-target-date').value || todayISO();
-      const description = document.getElementById('module-desc').value.trim();
 
       if (!title) {
         showToast('Ingresa el nombre de la sección.', 'amber');
@@ -2178,8 +2307,7 @@ jobs:
         id: 'mod-' + Date.now(),
         title,
         category,
-        targetDate,
-        description
+        targetDate
       });
       closeModal('modal-module');
       saveState();
@@ -2220,9 +2348,7 @@ jobs:
       document.getElementById('task-deadline').value = preselectedDate || offsetDateISO(3);
       document.getElementById('task-priority').value = 'medium';
 
-      const modal = document.getElementById('modal-task');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      openModal('modal-task');
     }
 
     async function saveTask() {
@@ -2243,20 +2369,20 @@ jobs:
           .from('tasks')
           .insert([{
             module_id: Number(moduleId),
-            title: title,
-            description: description,
+            title,
+            description,
             due_date: deadline,
             priority: prioLabel,
             completed: false
           }]);
 
-        // Respaldo si aún no se ha creado la columna description en PostgreSQL
-        if (error && String(error.message).includes('description')) {
+        // Reintento limpio si la columna description aún no fue creada en Supabase
+        if (error && String(error.message).toLowerCase().includes('description')) {
           const fallbackRes = await supabaseClient
             .from('tasks')
             .insert([{
               module_id: Number(moduleId),
-              title: title,
+              title,
               due_date: deadline,
               priority: prioLabel,
               completed: false
@@ -2289,7 +2415,7 @@ jobs:
     }
 
     async function cycleTaskStatus(taskId) {
-      const task = state.tasks.find(t => t.id === taskId);
+      const task = state.tasks.find(t => String(t.id) === String(taskId));
       if (!task) return;
       const nextCompleted = task.status !== 'completed';
 
@@ -2318,7 +2444,7 @@ jobs:
         }
       }
 
-      state.tasks = state.tasks.filter(t => t.id !== taskId);
+      state.tasks = state.tasks.filter(t => String(t.id) !== String(taskId));
       saveState();
       showToast('Tarea eliminada.', 'zinc');
     }
@@ -2328,7 +2454,7 @@ jobs:
       select.innerHTML = `<option value="">— Entrega libre —</option>` +
         state.tasks.map(t => `<option value="${t.id}">${escapeHtml(t.title)} (${t.deadline})</option>`).join('');
 
-      select.value = preselectedTaskId ? preselectedTaskId : '';
+      select.value = preselectedTaskId ? String(preselectedTaskId) : '';
       syncDeliverableFieldsFromTask();
 
       selectedFileBuffer = null;
@@ -2341,17 +2467,15 @@ jobs:
       document.getElementById('deliv-repo-url').value = '';
       document.getElementById('deliv-notes').value = '';
 
-      const modal = document.getElementById('modal-deliverable');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      openModal('modal-deliverable');
     }
 
     function syncDeliverableFieldsFromTask() {
       const taskId = document.getElementById('deliv-task-id').value;
-      const task = state.tasks.find(t => t.id === taskId);
+      const task = state.tasks.find(t => String(t.id) === String(taskId));
       if (task) {
         document.getElementById('deliv-title').value = task.title;
-        document.getElementById('deliv-deadline').value = task.deadline;
+        document.getElementById('deliv-deadline').value = task.deadline || todayISO();
       } else {
         document.getElementById('deliv-title').value = '';
         document.getElementById('deliv-deadline').value = todayISO();
@@ -2401,9 +2525,9 @@ jobs:
         return;
       }
 
-      const task = state.tasks.find(t => t.id === taskId);
+      const task = state.tasks.find(t => String(t.id) === String(taskId));
       const submittedAt = todayISO();
-      const deadline = task ? task.deadline : deadlineInput;
+      const deadline = task && task.deadline ? task.deadline : deadlineInput;
       const onTime = submittedAt <= deadline;
       const submitBtn = document.getElementById('btn-submit-deliverable');
 
@@ -2475,7 +2599,6 @@ jobs:
       state.deliverables.unshift({
         id: 'del-' + Date.now(),
         taskId: taskId || '',
-        moduleId: task ? task.moduleId : '',
         title: titleInput || (selectedFileBuffer ? selectedFileBuffer.name : 'Entrega'),
         deadline,
         fileName: selectedFileBuffer ? selectedFileBuffer.name : 'Repositorio',
@@ -2492,7 +2615,7 @@ jobs:
 
       closeModal('modal-deliverable');
       saveState();
-      showToast(onTime ? 'Entrega guardada EN PLAZO.' : 'Entrega guardada (fuera de plazo).', 'emerald');
+      showToast(onTime ? 'Entrega guardada EN PLAZO.' : 'Entrega guardada (con retraso).', 'emerald');
     }
 
     async function deleteDeliverable(delivId) {
@@ -2505,7 +2628,7 @@ jobs:
         }
       }
 
-      state.deliverables = state.deliverables.filter(d => d.id !== delivId);
+      state.deliverables = state.deliverables.filter(d => String(d.id) !== String(delivId));
       saveState();
       showToast('Entregable eliminado.', 'zinc');
     }
@@ -2513,9 +2636,7 @@ jobs:
     function openCheckinModal() {
       document.getElementById('checkin-hours').value = '2.0';
       document.getElementById('checkin-note').value = '';
-      const modal = document.getElementById('modal-checkin');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      openModal('modal-checkin');
     }
 
     async function saveDailyCheckin() {
@@ -2562,9 +2683,7 @@ jobs:
 
     function openGoalModal() {
       document.getElementById('goal-input').value = state.goal;
-      const modal = document.getElementById('modal-goal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      openModal('modal-goal');
     }
 
     function saveGoal() {
@@ -2577,9 +2696,7 @@ jobs:
     function openConnectionModal() {
       const { url, key } = CloudService.getCredentials();
       syncCredentialInputs(url, key);
-      const modal = document.getElementById('modal-connection');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      openModal('modal-connection');
     }
 
     async function saveSupabaseFromModal() {
@@ -2596,7 +2713,7 @@ jobs:
 
     async function applySupabaseConnection(url, key, closeAfter) {
       if (!url || !key) {
-        showToast('Pega tu Project URL y tu Anon Key.', 'amber');
+        showToast('Pega tu Project URL y tu Anon Public Key.', 'amber');
         return;
       }
       CloudService.setCredentials(url, key);
@@ -2634,13 +2751,19 @@ jobs:
               const newModId = data[0].id;
               const childTasks = state.tasks.filter(t => t.moduleId === mod.id);
               for (const t of childTasks) {
-                await supabaseClient.from('tasks').insert([{
+                const payload = {
                   module_id: newModId,
                   title: t.title,
-                  due_date: t.deadline,
+                  description: t.description || '',
+                  due_date: t.deadline || todayISO(),
                   priority: t.priority === 'high' ? 'Alta' : t.priority === 'low' ? 'Baja' : 'Media',
                   completed: t.status === 'completed'
-                }]);
+                };
+                const { error: tErr } = await supabaseClient.from('tasks').insert([payload]);
+                if (tErr && String(tErr.message).toLowerCase().includes('description')) {
+                  delete payload.description;
+                  await supabaseClient.from('tasks').insert([payload]);
+                }
               }
               syncedCount++;
             }
@@ -2663,9 +2786,7 @@ jobs:
     }
 
     function openResetConfirmModal() {
-      const modal = document.getElementById('modal-reset-confirm');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      openModal('modal-reset-confirm');
     }
 
     function confirmEmptyDatabase() {
@@ -2686,16 +2807,9 @@ jobs:
       showToast('Respaldo descargado.', 'emerald');
     }
 
-    function closeModal(modalId) {
-      const modal = document.getElementById(modalId);
-      if (!modal) return;
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    // =========================================================
-    // TEMPORIZADOR DE ENFOQUE
-    // =========================================================
+    // ===================================================================
+    // TEMPORIZADOR DE ENFOQUE (AUTO-UPSERT A study_logs)
+    // ===================================================================
     function updateTimerDisplay() {
       const mins = Math.floor(timerSeconds / 60);
       const secs = timerSeconds % 60;
@@ -2712,6 +2826,17 @@ jobs:
       timerInitialMinutes = minutes;
       timerSeconds = minutes * 60;
       updateTimerDisplay();
+
+      const p25 = document.getElementById('preset-25');
+      const p50 = document.getElementById('preset-50');
+      if (p25 && p50) {
+        p25.className = minutes === 25
+          ? 'px-2 py-0.5 rounded bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 hover:opacity-90'
+          : 'px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:opacity-80';
+        p50.className = minutes === 50
+          ? 'px-2 py-0.5 rounded bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 hover:opacity-90'
+          : 'px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:opacity-80';
+      }
     }
 
     function toggleTimer() {
@@ -2731,6 +2856,7 @@ jobs:
             clearInterval(timerInterval);
             timerRunning = false;
             btn.textContent = 'Iniciar';
+
             const hoursEarned = Number((timerInitialMinutes / 60).toFixed(2));
             const today = todayISO();
             let logRecord = state.studyLogs.find(l => l.date === today);
@@ -2741,15 +2867,20 @@ jobs:
               state.studyLogs.unshift(logRecord);
             }
             saveState();
+
             if (supabaseOnline && supabaseClient) {
-              await supabaseClient.from('study_logs').upsert([{
-                log_date: today,
-                hours: logRecord.hours,
-                summary: logRecord.note
-              }], { onConflict: 'log_date' });
-              await CloudService.pullStateFromServer();
+              try {
+                await supabaseClient.from('study_logs').upsert([{
+                  log_date: today,
+                  hours: logRecord.hours,
+                  summary: logRecord.note
+                }], { onConflict: 'log_date' });
+                await CloudService.pullStateFromServer();
+              } catch (err) {
+                console.warn('Error guardando sesión del temporizador:', err);
+              }
             }
-            showToast('¡Bloque terminado! Horas sumadas a tu bitácora.', 'emerald');
+            showToast('Bloque terminado. Horas registradas en tu bitácora.', 'emerald');
           }
         }, 1000);
       }
@@ -2763,9 +2894,9 @@ jobs:
       updateTimerDisplay();
     }
 
-    // =========================================================
-    // NOTIFICACIONES REALES POR TELEGRAM (BOT API)
-    // =========================================================
+    // ===================================================================
+    // NOTIFICACIONES POR TELEGRAM (MENSAJE SOBRIO SIN EMOJIS)
+    // ===================================================================
     function getTelegramCredentials() {
       return {
         token: (localStorage.getItem(TG_TOKEN_KEY) || '').trim(),
@@ -2831,7 +2962,7 @@ jobs:
         const streak = calculateStreak();
         const pending = state.tasks
           .filter(t => t.status !== 'completed')
-          .sort((a, b) => a.deadline.localeCompare(b.deadline))
+          .sort((a, b) => (a.deadline || '').localeCompare(b.deadline || ''))
           .slice(0, 4);
 
         const tasksLines = pending.length > 0
@@ -2849,18 +2980,18 @@ jobs:
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: chatId,
-            text: text,
+            text,
             parse_mode: 'Markdown'
           })
         });
 
         const data = await res.json();
         if (!data.ok) {
-          throw new Error(data.description || 'Revisa el Token y haberle dado Iniciar a tu bot');
+          throw new Error(data.description || 'Revisa el Token y haber iniciado el chat con tu bot');
         }
 
         if (!isAuto) {
-          showToast('¡Notificación enviada a tu Telegram!', 'emerald');
+          showToast('Notificación enviada a tu Telegram.', 'emerald');
         }
       } catch (err) {
         if (!isAuto) {
@@ -2874,7 +3005,6 @@ jobs:
       }
     }
 
-    // Verifica cada minuto si ya pasó la hora configurada y aún no has estudiado hoy
     function checkAutoDailyTelegram() {
       if (!state.reminder || !state.reminder.enabled) return;
       const { token, chatId } = getTelegramCredentials();
@@ -2894,6 +3024,9 @@ jobs:
       }
     }
 
+    // ===================================================================
+    // PORTAPAPELES (COMPATIBLE CON IFRAME) Y TOASTS
+    // ===================================================================
     function copyCodeBlock(elementId) {
       const el = document.getElementById(elementId);
       if (!el) return;
@@ -2905,9 +3038,9 @@ jobs:
       textarea.select();
       try {
         document.execCommand('copy');
-        showToast('Código copiado.', 'emerald');
+        showToast('Código YAML copiado.', 'emerald');
       } catch (err) {
-        showToast('No se pudo copiar.', 'amber');
+        showToast('No se pudo copiar automáticamente.', 'amber');
       }
       document.body.removeChild(textarea);
     }
@@ -2934,6 +3067,7 @@ jobs:
       if (banner) banner.classList.add('hidden');
     }
 
+    // Cierre de modales con tecla ESC
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         ['modal-module', 'modal-task', 'modal-deliverable', 'modal-checkin', 'modal-goal', 'modal-connection', 'modal-reset-confirm']
@@ -2941,6 +3075,7 @@ jobs:
       }
     });
 
+    // Inicialización al cargar
     window.onload = async function() {
       switchTab('dashboard');
       renderAll();
